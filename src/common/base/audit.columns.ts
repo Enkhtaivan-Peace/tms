@@ -22,7 +22,7 @@ export class AuditColumns {
     name: 'deleted_at',
     nullable: true,
   })
-  deletedAt?: Date | null;
+  deletedAt?: Date;
 
   @VersionColumn({
     name: 'version',

@@ -1,4 +1,14 @@
-import { Entity, Column, OneToMany, Index, Unique } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  Index,
+  Unique,
+  CreateDateColumn,
+  DeleteDateColumn,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 
 import { BaseEntity } from '../../../common/base/base.entity';
 import { RolePermission } from './role-permission.entity';
@@ -29,10 +39,26 @@ export class Permission extends BaseEntity {
   })
   description?: string;
 
-  @Column(() => AuditColumns, {
-    prefix: '',
+  @CreateDateColumn({
+    name: 'created_at',
   })
-  audit!: AuditColumns;
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+  })
+  deletedAt?: Date;
+
+  @VersionColumn({
+    name: 'version',
+  })
+  version!: number;
 
   @OneToMany(
     () => RolePermission,

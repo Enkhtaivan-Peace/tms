@@ -1,17 +1,10 @@
 import { Module } from '@nestjs/common';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { DepartmentEntity } from './entities/department.entity';
-
 import { DepartmentController } from './controllers/department.controller';
-
 import { DepartmentService } from './services/department.service';
-
 import { DepartmentTreeService } from './services/department-tree.service';
-
 import { DepartmentRepository } from './repositories/department.repository';
-
 import { DepartmentQueryRepository } from './repositories/department-query.repository';
 
 @Module({
@@ -21,11 +14,8 @@ import { DepartmentQueryRepository } from './repositories/department-query.repos
 
   providers: [
     DepartmentService,
-
     DepartmentTreeService,
-
     DepartmentRepository,
-
     DepartmentQueryRepository,
   ],
 

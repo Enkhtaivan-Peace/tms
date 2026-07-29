@@ -1,9 +1,17 @@
-import { Entity, Column, OneToMany, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  Index,
+  CreateDateColumn,
+  DeleteDateColumn,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 
 import { BaseEntity } from '../../../common/base/base.entity';
 import { RolePermission } from './role-permission.entity';
 import { UserRole } from './user-role.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
 
 @Entity('iam_roles')
 @Index(['code'], { unique: true })
@@ -32,10 +40,26 @@ export class Role extends BaseEntity {
   })
   isSystem!: boolean;
 
-  @Column(() => AuditColumns, {
-    prefix: '',
+  @CreateDateColumn({
+    name: 'created_at',
   })
-  audit!: AuditColumns;
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+  })
+  deletedAt?: Date;
+
+  @VersionColumn({
+    name: 'version',
+  })
+  version!: number;
 
   @OneToMany(() => UserRole, (userRole) => userRole.role)
   userRoles!: UserRole[];

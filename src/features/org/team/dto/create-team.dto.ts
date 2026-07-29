@@ -1,9 +1,8 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
-export class CreateDepartmentDto {
-  @IsOptional()
+export class CreateTeamDto {
   @IsNumber()
-  parentId?: number;
+  departmentId!: number;
 
   @IsString()
   code!: string;

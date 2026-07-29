@@ -7,6 +7,9 @@ import { AppService } from './app.service';
 import { IamModule } from './features/iam/iam.module';
 import { LoggerModule } from 'nestjs-pino';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { DepartmentModule } from './features/org/department/department.module';
+import { TeamModule } from './features/org/team/team.module';
+import { WorkItemModule } from './features/work/work.module';
 
 @Module({
   imports: [
@@ -42,6 +45,9 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     }),
 
     IamModule,
+    DepartmentModule,
+    TeamModule,
+    WorkItemModule,
   ],
 
   controllers: [AppController],

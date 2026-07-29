@@ -2,51 +2,40 @@ import { BaseEntity } from 'src/common/base/base.entity';
 import {
   Entity,
   Column,
-  JoinColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
   CreateDateColumn,
   DeleteDateColumn,
   UpdateDateColumn,
   VersionColumn,
+  IsNull,
 } from 'typeorm';
-import { DepartmentStatus } from '../enums/department-status.enum';
+import { DepartmentEntity } from '../../department/entities/department.entity';
+import { TeamStatus } from '../enums/team-status.enum';
+import { TeamMemberEntity } from './team-member.entity';
+import { AuditColumns } from 'src/common/base/audit.columns';
 
-@Entity('org_departments')
-export class DepartmentEntity extends BaseEntity {
-  /**
-   * Parent department
-   *
-   * Example:
-   *
-   * Engineering
-   *      |
-   *      +-- Backend
-   *
-   */
+@Entity('org_teams')
+export class TeamEntity extends BaseEntity {
   @Column({
-    name: 'parent_id',
+    name: 'department_id',
     type: 'bigint',
-    nullable: true,
   })
-  parentId?: number;
+  departmentId!: number;
 
-  @ManyToOne(() => DepartmentEntity, (department) => department.children, {
-    nullable: true,
+  @ManyToOne(() => DepartmentEntity, {
+    onDelete: 'CASCADE',
   })
   @JoinColumn({
-    name: 'parent_id',
+    name: 'department_id',
   })
-  parent?: DepartmentEntity;
-
-  @OneToMany(() => DepartmentEntity, (department) => department.parent)
-  children?: DepartmentEntity[];
+  department!: DepartmentEntity;
 
   @Column({
     length: 50,
-    unique: true,
   })
-  code!: string;
+  code?: string;
 
   @Column({
     length: 200,
@@ -60,7 +49,7 @@ export class DepartmentEntity extends BaseEntity {
   description?: string;
 
   /**
-   * Department manager user id
+   * Team leader
    */
   @Column({
     name: 'manager_id',
@@ -71,11 +60,15 @@ export class DepartmentEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: DepartmentStatus,
-    default: DepartmentStatus.ACTIVE,
+    enum: TeamStatus,
+    default: TeamStatus.ACTIVE,
   })
-  status?: DepartmentStatus;
+  status!: TeamStatus;
 
+  @OneToMany(() => TeamMemberEntity, (member) => member.team, {
+    cascade: true,
+  })
+  members?: TeamMemberEntity[];
   @CreateDateColumn({
     name: 'created_at',
   })

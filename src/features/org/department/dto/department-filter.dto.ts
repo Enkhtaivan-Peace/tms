@@ -1,17 +1,15 @@
-import { IsOptional, IsNumber, IsString } from 'class-validator';
+import { IsOptional, IsNumberString, IsString } from 'class-validator';
 
 export class DepartmentFilterDto {
   @IsOptional()
-  @IsNumber()
-  organizationId?: number;
+  @IsNumberString()
+  page?: number;
+
+  @IsOptional()
+  @IsNumberString()
+  limit?: number;
 
   @IsOptional()
   @IsString()
   search?: string;
-
-  @IsOptional()
-  page?: number = 1;
-
-  @IsOptional()
-  limit?: number = 20;
 }

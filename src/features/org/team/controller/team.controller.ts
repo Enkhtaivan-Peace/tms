@@ -1,7 +1,7 @@
 import {
   Controller,
-  Get,
   Post,
+  Get,
   Patch,
   Delete,
   Body,
@@ -9,19 +9,19 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { DepartmentService } from '../services/department.service';
+import { TeamService } from '../services/team.service';
 
-import { CreateDepartmentDto } from '../dto/create-department.dto';
-import { DepartmentFilterDto } from '../dto/department-filter.dto';
+import { CreateTeamDto } from '../dto/create-team.dto';
+import { TeamFilterDto } from '../dto/team-filter.dto';
 
-@Controller('departments')
-export class DepartmentController {
-  constructor(private readonly service: DepartmentService) {}
+@Controller('teams')
+export class TeamController {
+  constructor(private service: TeamService) {}
 
   @Post()
   create(
     @Body()
-    dto: CreateDepartmentDto,
+    dto: CreateTeamDto,
   ) {
     return this.service.create(dto);
   }
@@ -29,9 +29,17 @@ export class DepartmentController {
   @Get()
   findAll(
     @Query()
-    filter: DepartmentFilterDto,
+    filter: TeamFilterDto,
   ) {
     return this.service.findAll(filter);
+  }
+
+  @Get('department/:departmentId')
+  findByDepartment(
+    @Param('departmentId')
+    departmentId: number,
+  ) {
+    return this.service.findAllByDepartment(departmentId);
   }
 
   @Get(':id')
@@ -46,7 +54,6 @@ export class DepartmentController {
   update(
     @Param('id')
     id: number,
-
     @Body()
     dto: any,
   ) {

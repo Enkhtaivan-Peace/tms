@@ -5,6 +5,7 @@ import { CreateDepartmentDto } from '../dto/create-department.dto';
 import { DepartmentRepository } from '../repositories/department.repository';
 
 import { DepartmentQueryRepository } from '../repositories/department-query.repository';
+import { DepartmentFilterDto } from '../dto/department-filter.dto';
 
 @Injectable()
 export class DepartmentService {
@@ -20,7 +21,7 @@ export class DepartmentService {
     return this.repository.save(entity);
   }
 
-  async findAll(filter: any) {
+  findAll(filter: DepartmentFilterDto) {
     return this.queryRepository.findAll(filter);
   }
 

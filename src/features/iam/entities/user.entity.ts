@@ -1,4 +1,12 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  DeleteDateColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 
 import { BaseEntity } from '../../../common/base/base.entity';
 
@@ -60,10 +68,26 @@ export class User extends BaseEntity {
   })
   isActive!: boolean;
 
-  @Column(() => AuditColumns, {
-    prefix: '',
+  @CreateDateColumn({
+    name: 'created_at',
   })
-  audit!: AuditColumns;
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    nullable: true,
+  })
+  deletedAt?: Date;
+
+  @VersionColumn({
+    name: 'version',
+  })
+  version!: number;
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   userRoles?: UserRole[];
