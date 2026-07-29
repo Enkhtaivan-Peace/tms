@@ -12,7 +12,6 @@ import { BaseEntity } from '../../../common/base/base.entity';
 
 import { UserStatus } from 'src/common/helpers/enums/user-status.enum';
 import { UserRole } from './user-role.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
 import { UserSession } from './user-session.entity';
 
 @Entity('iam_users')

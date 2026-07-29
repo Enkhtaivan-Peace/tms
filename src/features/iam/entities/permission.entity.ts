@@ -12,7 +12,6 @@ import {
 
 import { BaseEntity } from '../../../common/base/base.entity';
 import { RolePermission } from './role-permission.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
 
 @Entity('iam_permissions')
 @Index(['code'], { unique: true })

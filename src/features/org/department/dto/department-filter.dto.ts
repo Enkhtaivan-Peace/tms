@@ -1,15 +1,3 @@
-import { IsOptional, IsNumberString, IsString } from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-export class DepartmentFilterDto {
-  @IsOptional()
-  @IsNumberString()
-  page?: number;
-
-  @IsOptional()
-  @IsNumberString()
-  limit?: number;
-
-  @IsOptional()
-  @IsString()
-  search?: string;
-}
+export class DepartmentFilterDto extends PaginationDto {}

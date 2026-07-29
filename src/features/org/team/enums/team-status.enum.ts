@@ -3,3 +3,9 @@ export enum TeamStatus {
 
   INACTIVE = 'INACTIVE',
 }
+
+export enum TeamMemberStatus {
+  ACTIVE = 'ACTIVE',
+
+  INACTIVE = 'INACTIVE',
+}

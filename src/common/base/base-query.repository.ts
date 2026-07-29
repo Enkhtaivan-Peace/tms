@@ -1,9 +1,10 @@
 import {
   Repository,
-  FindOptionsWhere,
-  FindOptionsOrder,
   IsNull,
   Like,
+  FindOptionsWhere,
+  FindOptionsOrder,
+  FindOptionsRelations,
 } from 'typeorm';
 
 import { PaginationDto, SortOrder } from '../dto/pagination.dto';
@@ -15,9 +16,6 @@ export abstract class BaseQueryRepository<
 > {
   constructor(protected readonly repository: Repository<T>) {}
 
-  /**
-   * Standard pagination
-   */
   async paginate(options: {
     filter: PaginationDto;
 
@@ -26,8 +24,20 @@ export abstract class BaseQueryRepository<
     searchFields?: (keyof T)[];
 
     defaultSort?: string;
+
+    relations?: FindOptionsRelations<T>;
   }) {
-    const { filter, where, searchFields = [], defaultSort = 'id' } = options;
+    const {
+      filter,
+
+      where,
+
+      searchFields = [],
+
+      defaultSort = 'id',
+
+      relations,
+    } = options;
 
     const page = Number(filter.page ?? 1);
 
@@ -37,23 +47,14 @@ export abstract class BaseQueryRepository<
 
     let conditions: any;
 
-    /**
-     * Soft delete
-     */
     const baseCondition: any = {
       deletedAt: IsNull(),
     };
 
-    /**
-     * merge filter
-     */
     if (where) {
       Object.assign(baseCondition, where);
     }
 
-    /**
-     * Search
-     */
     if (filter.search && searchFields.length) {
       conditions = searchFields.map((field) => ({
         ...baseCondition,
@@ -64,16 +65,9 @@ export abstract class BaseQueryRepository<
       conditions = baseCondition;
     }
 
-    /**
-     * Sort
-     */
-    const sortBy = (filter.sortBy ?? defaultSort) as keyof T;
+    const sortBy = filter.sortBy ?? defaultSort;
 
     const sortOrder = filter.sortOrder ?? SortOrder.ASC;
-
-    const order: FindOptionsOrder<T> = {
-      [sortBy]: sortOrder,
-    } as FindOptionsOrder<T>;
 
     const [data, total] = await this.repository.findAndCount({
       where: conditions,
@@ -82,7 +76,11 @@ export abstract class BaseQueryRepository<
 
       take: limit,
 
-      order,
+      order: {
+        [sortBy]: sortOrder,
+      } as FindOptionsOrder<T>,
+
+      relations,
     });
 
     return {

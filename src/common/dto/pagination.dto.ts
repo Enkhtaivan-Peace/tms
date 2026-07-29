@@ -1,4 +1,6 @@
-import { IsOptional, IsNumberString, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsNumber, IsString, IsEnum } from 'class-validator';
+
+import { Transform } from 'class-transformer';
 
 export enum SortOrder {
   ASC = 'ASC',
@@ -7,11 +9,13 @@ export enum SortOrder {
 
 export class PaginationDto {
   @IsOptional()
-  @IsNumberString()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
   page?: number;
 
   @IsOptional()
-  @IsNumberString()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
   limit?: number;
 
   @IsOptional()

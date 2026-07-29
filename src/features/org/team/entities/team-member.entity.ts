@@ -1,19 +1,20 @@
+import { BaseEntity } from 'src/common/base/base.entity';
+
 import {
   Entity,
   Column,
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
-  DeleteDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   VersionColumn,
 } from 'typeorm';
 
-import { TeamEntity } from './team.entity';
+import { TeamEntity } from '../../team/entities/team.entity';
 
 import { TeamMemberRole } from '../enums/team-member-role.enum';
-import { BaseEntity } from 'src/common/base/base.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
+import { TeamMemberStatus } from '../enums/team-status.enum';
 
 @Entity('org_team_members')
 export class TeamMemberEntity extends BaseEntity {
@@ -43,6 +44,17 @@ export class TeamMemberEntity extends BaseEntity {
     default: TeamMemberRole.MEMBER,
   })
   role!: TeamMemberRole;
+
+  @Column({
+    type: 'enum',
+    enum: TeamMemberStatus,
+    default: TeamMemberStatus.ACTIVE,
+  })
+  status!: TeamMemberStatus;
+
+  /*
+   * Audit columns
+   */
 
   @CreateDateColumn({
     name: 'created_at',

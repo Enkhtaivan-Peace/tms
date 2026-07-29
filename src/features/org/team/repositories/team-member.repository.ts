@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, IsNull } from 'typeorm';
 
 import { TeamMemberEntity } from '../entities/team-member.entity';
 
@@ -15,26 +15,25 @@ export class TeamMemberRepository extends Repository<TeamMemberEntity> {
       where: {
         teamId,
         userId,
+        deletedAt: IsNull(),
       },
     });
   }
 
-  async findByTeam(teamId: number) {
-    return this.find({
-      where: {
-        teamId,
-      },
-    });
-  }
-
-  async existsUserInTeam(teamId: number, userId: number) {
-    const count = await this.count({
+  async existsMember(teamId: number, userId: number) {
+    return this.exists({
       where: {
         teamId,
         userId,
+        deletedAt: IsNull(),
       },
     });
+  }
 
-    return count > 0;
+  async removeMember(teamId: number, id: number) {
+    return this.softDelete({
+      id,
+      teamId,
+    });
   }
 }

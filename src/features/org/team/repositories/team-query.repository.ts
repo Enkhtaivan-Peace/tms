@@ -22,13 +22,16 @@ export class TeamQueryRepository extends BaseQueryRepository<TeamEntity> {
       .getMany();
   }
 
-  findAll(filter: any) {
+  async findAll(filter: TeamFilterDto) {
     return this.paginate({
       filter,
 
       searchFields: ['name', 'code'],
-
       defaultSort: 'name',
+
+      relations: {
+        department: true,
+      },
     });
   }
 }

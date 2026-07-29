@@ -11,7 +11,6 @@ import {
 
 import { WorkItemEntity } from './work-item.entity';
 import { BaseEntity } from 'src/common/base/base.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
 
 @Entity('work_assignments')
 export class WorkAssignmentEntity extends BaseEntity {

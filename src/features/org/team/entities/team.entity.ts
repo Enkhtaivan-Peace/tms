@@ -14,7 +14,6 @@ import {
 import { DepartmentEntity } from '../../department/entities/department.entity';
 import { TeamStatus } from '../enums/team-status.enum';
 import { TeamMemberEntity } from './team-member.entity';
-import { AuditColumns } from 'src/common/base/audit.columns';
 
 @Entity('org_teams')
 export class TeamEntity extends BaseEntity {
