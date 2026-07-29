@@ -1,0 +1,73 @@
+import { Entity, Column, OneToMany } from 'typeorm';
+
+import { BaseEntity } from '../../../common/base/base.entity';
+
+import { UserStatus } from 'src/common/helpers/enums/user-status.enum';
+import { UserRole } from './user-role.entity';
+import { AuditColumns } from 'src/common/base/audit.columns';
+import { UserSession } from './user-session.entity';
+
+@Entity('users')
+export class User extends BaseEntity {
+  @Column({
+    unique: true,
+    length: 100,
+  })
+  username!: string;
+
+  @Column({
+    unique: true,
+    length: 255,
+  })
+  email!: string;
+
+  @Column({
+    name: 'password_hash',
+    length: 255,
+  })
+  passwordHash!: string;
+
+  @Column({
+    name: 'first_name',
+    length: 100,
+    nullable: true,
+  })
+  firstName?: string;
+
+  @Column({
+    name: 'last_name',
+    length: 100,
+    nullable: true,
+  })
+  lastName?: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status!: UserStatus;
+
+  @Column({
+    name: 'last_login_at',
+    nullable: true,
+  })
+  lastLoginAt?: Date;
+
+  @Column({
+    name: 'is_active',
+    default: true,
+  })
+  isActive!: boolean;
+
+  @Column(() => AuditColumns, {
+    prefix: '',
+  })
+  audit!: AuditColumns;
+
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles?: UserRole[];
+
+  @OneToMany(() => UserSession, (session) => session.user)
+  sessions!: UserSession[];
+}
