@@ -7,7 +7,7 @@ import { UserRole } from './user-role.entity';
 import { AuditColumns } from 'src/common/base/audit.columns';
 import { UserSession } from './user-session.entity';
 
-@Entity('users')
+@Entity('iam_users')
 export class User extends BaseEntity {
   @Column({
     unique: true,

@@ -3,7 +3,7 @@ import { BaseEntity } from '../../../common/base/base.entity';
 import { User } from './user.entity';
 import { Role } from './role.entity';
 
-@Entity('user_roles')
+@Entity('iam_user_roles')
 @Unique(['userId', 'roleId'])
 @Index(['userId'])
 @Index(['roleId'])

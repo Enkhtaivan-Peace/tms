@@ -5,8 +5,8 @@ import { RolePermission } from './role-permission.entity';
 import { UserRole } from './user-role.entity';
 import { AuditColumns } from 'src/common/base/audit.columns';
 
-@Entity('roles')
-@Index(['code'])
+@Entity('iam_roles')
+@Index(['code'], { unique: true })
 @Index(['isSystem'])
 export class Role extends BaseEntity {
   @Column({
@@ -16,7 +16,6 @@ export class Role extends BaseEntity {
   name!: string;
 
   @Column({
-    unique: true,
     length: 100,
   })
   code!: string;

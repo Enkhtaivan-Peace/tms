@@ -4,12 +4,11 @@ import { BaseEntity } from '../../../common/base/base.entity';
 import { RolePermission } from './role-permission.entity';
 import { AuditColumns } from 'src/common/base/audit.columns';
 
-@Entity('permissions')
-@Index(['code'])
+@Entity('iam_permissions')
+@Index(['code'], { unique: true })
 @Unique(['module', 'action'])
 export class Permission extends BaseEntity {
   @Column({
-    unique: true,
     length: 100,
   })
   code!: string;

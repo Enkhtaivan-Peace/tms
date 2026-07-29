@@ -3,7 +3,7 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/base/base.entity';
 import { User } from './user.entity';
 
-@Entity('user_sessions')
+@Entity('iam_user_sessions')
 @Index(['refreshToken'], { unique: true })
 @Index(['userId'])
 export class UserSession extends BaseEntity {

@@ -6,7 +6,7 @@ import { Role } from './role.entity';
 
 import { Permission } from './permission.entity';
 
-@Entity('role_permissions')
+@Entity('iam_role_permissions')
 @Unique(['roleId', 'permissionId'])
 @Index(['roleId'])
 @Index(['permissionId'])
