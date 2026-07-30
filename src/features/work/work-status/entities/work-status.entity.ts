@@ -1,10 +1,9 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, UpdateDateColumn } from 'typeorm';
 
 import { BaseEntity } from 'src/common/base/base.entity';
 
 @Entity({
   name: 'work_statuses',
-  schema: 'work',
 })
 export class WorkStatusEntity extends BaseEntity {
   @Column({
@@ -91,10 +90,7 @@ export class WorkStatusEntity extends BaseEntity {
   })
   createdAt!: Date;
 
-  @Column({
-    name: 'updated_at',
-    type: 'timestamp',
-  })
+  @UpdateDateColumn()
   updatedAt!: Date;
 
   @Column({

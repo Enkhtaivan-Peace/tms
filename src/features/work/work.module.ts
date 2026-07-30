@@ -1,42 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { WorkItemEntity } from './work/entities/work-item.entity';
-
-import { WorkAssignmentEntity } from './work/entities/work-assignment.entity';
-
-import { WorkItemController } from './work/controllers/work-item.controller';
-
-import { WorkAssignmentController } from './work/controllers/work-assignment.controller';
-
-import { WorkItemService } from './work/services/work-item.service';
-
-import { WorkAssignmentService } from './work/services/work-assignment.service';
-
-import { WorkItemRepository } from './work/repositories/work-item.repository';
-
-import { WorkAssignmentRepository } from './work/repositories/work-assignment.repository';
-
-import { WorkItemQueryRepository } from './work/repositories/work-item-query.repository';
+import { WorkTypeModule } from './work-type/work-type.module';
+import { WorkCategoryModule } from './work-category/work-category.module';
+import { WorkStatusModule } from './work-status/work-status.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkItemEntity, WorkAssignmentEntity])],
-
-  controllers: [WorkItemController, WorkAssignmentController],
-
-  providers: [
-    WorkItemService,
-
-    WorkAssignmentService,
-
-    WorkItemRepository,
-
-    WorkAssignmentRepository,
-
-    WorkItemQueryRepository,
-  ],
-
-  exports: [WorkItemService],
+  imports: [WorkTypeModule, WorkCategoryModule, WorkStatusModule],
 })
-export class WorkItemModule {}
+export class WorkModule {}

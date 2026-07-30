@@ -19,9 +19,7 @@ import { WorkCategoryQueryRepository } from './repositories/work-category-query.
 
   providers: [
     WorkCategoryService,
-
     WorkCategoryRepository,
-
     WorkCategoryQueryRepository,
   ],
 

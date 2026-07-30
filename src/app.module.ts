@@ -9,10 +9,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { DepartmentModule } from './features/org/department/department.module';
 import { TeamModule } from './features/org/team/team.module';
-import { WorkItemModule } from './features/work/work.module';
-import { WorkTypeModule } from './features/work/work-type/work-type.module';
-import { WorkCategoryModule } from './features/work/work-category/work-category.module';
-import { WorkStatusModule } from './features/work/work-status/work-status.module';
+import { WorkModule } from './features/work/work.module';
 
 @Module({
   imports: [
@@ -50,10 +47,7 @@ import { WorkStatusModule } from './features/work/work-status/work-status.module
     IamModule,
     DepartmentModule,
     TeamModule,
-    WorkItemModule,
-    WorkTypeModule,
-    WorkCategoryModule,
-    WorkStatusModule,
+    WorkModule,
   ],
 
   controllers: [AppController],

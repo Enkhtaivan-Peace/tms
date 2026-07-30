@@ -10,7 +10,6 @@ import {
 
 @Entity({
   name: 'work_types',
-  schema: 'work',
 })
 @Index(['code'], { unique: true })
 export class WorkTypeEntity extends BaseEntity {

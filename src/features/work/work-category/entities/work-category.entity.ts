@@ -1,10 +1,9 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, UpdateDateColumn } from 'typeorm';
 
 import { BaseEntity } from 'src/common/base/base.entity';
 
 @Entity({
   name: 'work_categories',
-  schema: 'work',
 })
 export class WorkCategoryEntity extends BaseEntity {
   @Column({
@@ -67,11 +66,7 @@ export class WorkCategoryEntity extends BaseEntity {
     type: 'timestamp',
   })
   createdAt!: Date;
-
-  @Column({
-    name: 'updated_at',
-    type: 'timestamp',
-  })
+  @UpdateDateColumn()
   updatedAt!: Date;
 
   @Column({

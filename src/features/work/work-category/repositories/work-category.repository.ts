@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { IsNull, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Repository } from 'typeorm';
 
 import { WorkCategoryEntity } from '../entities/work-category.entity';
 
@@ -8,7 +10,10 @@ import { BaseRepository } from 'src/common/base/base.repository';
 
 @Injectable()
 export class WorkCategoryRepository extends BaseRepository<WorkCategoryEntity> {
-  constructor(repository: Repository<WorkCategoryEntity>) {
+  constructor(
+    @InjectRepository(WorkCategoryEntity)
+    repository: Repository<WorkCategoryEntity>,
+  ) {
     super(repository);
   }
 
@@ -16,7 +21,6 @@ export class WorkCategoryRepository extends BaseRepository<WorkCategoryEntity> {
     return this.repository.findOne({
       where: {
         code,
-        deletedAt: IsNull(),
       },
     });
   }
