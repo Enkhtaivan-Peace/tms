@@ -13,72 +13,46 @@ export class WorkTemplateQueryRepository {
   async findAll(query: QueryWorkTemplateDto) {
     const {
       page = 1,
+
       limit = 20,
+
       search,
-      workTypeId,
-      workCategoryId,
-      defaultPriority,
-      isDefault,
+
       isActive,
     } = query;
 
     const qb = this.dataSource
       .getRepository(WorkTemplateEntity)
-      .createQueryBuilder('template')
-
-      .leftJoinAndSelect('template.workType', 'workType')
-
-      .leftJoinAndSelect('template.workCategory', 'workCategory');
+      .createQueryBuilder('template');
 
     qb.where('template.deleted_at IS NULL');
 
     if (search) {
       qb.andWhere(
         `
-        (
-          template.code LIKE :search
-          OR template.name LIKE :search
-        )
-        `,
+(
+ template.name LIKE :search
+ OR
+ template.code LIKE :search
+)
+`,
         {
           search: `%${search}%`,
         },
       );
     }
 
-    if (workTypeId) {
-      qb.andWhere('template.work_type_id = :workTypeId', {
-        workTypeId,
-      });
-    }
-
-    if (workCategoryId) {
-      qb.andWhere('template.work_category_id = :workCategoryId', {
-        workCategoryId,
-      });
-    }
-
-    if (defaultPriority) {
-      qb.andWhere('template.default_priority = :defaultPriority', {
-        defaultPriority,
-      });
-    }
-
-    if (isDefault !== undefined) {
-      qb.andWhere('template.is_default = :isDefault', {
-        isDefault,
-      });
-    }
-
     if (isActive !== undefined) {
-      qb.andWhere('template.is_active = :isActive', {
+      qb.andWhere('template.is_active=:isActive', {
         isActive,
       });
     }
 
-    qb.orderBy('template.sort_order', 'ASC');
+    qb.leftJoinAndSelect('template.workType', 'workType');
 
-    qb.addOrderBy('template.id', 'ASC');
+    qb.leftJoinAndSelect('template.initialStatus', 'status');
+
+    qb.orderBy('template.id', 'DESC');
 
     qb.skip((page - 1) * limit);
 
@@ -88,9 +62,13 @@ export class WorkTemplateQueryRepository {
 
     return {
       items,
+
       total,
+
       page,
+
       limit,
+
       totalPages: Math.ceil(total / limit),
     };
   }

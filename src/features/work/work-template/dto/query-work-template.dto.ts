@@ -1,42 +1,19 @@
-import { Type } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
-import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class QueryWorkTemplateDto {
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page: number = 1;
+  page?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  limit: number = 20;
+  limit?: number;
 
   @IsOptional()
   @IsString()
   search?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  workTypeId?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  workCategoryId?: number;
-
-  @IsOptional()
-  @IsString()
-  defaultPriority?: string;
-
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  isDefault?: boolean;
 
   @IsOptional()
   @Type(() => Boolean)

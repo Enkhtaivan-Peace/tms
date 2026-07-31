@@ -2,44 +2,55 @@ import { WorkTemplateEntity } from '../entities/work-template.entity';
 
 import { CreateWorkTemplateDto } from '../dto/create-work-template.dto';
 
-import { UpdateWorkTemplateDto } from '../dto/update-work-template.dto';
-
 export class WorkTemplateMapper {
-  static toEntity(dto: CreateWorkTemplateDto): WorkTemplateEntity {
-    const entity = new WorkTemplateEntity();
+  static toEntity(dto: CreateWorkTemplateDto): Partial<WorkTemplateEntity> {
+    return {
+      /**
+       * Identity
+       */
+      code: dto.code,
 
-    entity.code = dto.code;
+      name: dto.name,
 
-    entity.name = dto.name;
+      description: dto.description,
 
-    entity.description = dto.description;
+      /**
+       * Classification
+       */
+      workTypeId: dto.workTypeId,
 
-    entity.workTypeId = dto.workTypeId;
+      workCategoryId: dto.workCategoryId,
 
-    entity.workCategoryId = dto.workCategoryId;
+      sequenceKey: dto.sequenceKey ?? dto.codePrefix,
 
-    entity.initialStatusId = dto.initialStatusId;
+      /**
+       * Workflow
+       */
+      initialStatusId: dto.initialStatusId,
 
-    entity.defaultPriority = dto.defaultPriority ?? 'MEDIUM';
+      /**
+       * Default values
+       */
+      defaultPriority: dto.defaultPriority ?? 'MEDIUM',
 
-    entity.estimatedHours = dto.estimatedHours ?? 0;
+      defaultEstimatedHours: dto.defaultEstimatedHours ?? 0,
 
-    entity.allowAttachment = dto.allowAttachment ?? true;
+      defaultDueDays: dto.defaultDueDays ?? 0,
 
-    entity.allowComment = dto.allowComment ?? true;
+      /**
+       * Behavior rules
+       */
+      allowAttachment: dto.allowAttachment ?? true,
 
-    entity.isDefault = dto.isDefault ?? false;
+      allowComment: dto.allowComment ?? true,
 
-    entity.isActive = dto.isActive ?? true;
+      requireApproval: dto.requireApproval ?? false,
 
-    entity.sortOrder = dto.sortOrder ?? 0;
-
-    return entity;
-  }
-
-  static updateEntity(entity: WorkTemplateEntity, dto: UpdateWorkTemplateDto) {
-    Object.assign(entity, dto);
-
-    return entity;
+      /**
+       * Flags
+       */
+      isActive: true,
+      isDefault: false,
+    };
   }
 }

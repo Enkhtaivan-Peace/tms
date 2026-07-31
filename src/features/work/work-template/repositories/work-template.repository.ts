@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+
+import { IsNull, Repository } from 'typeorm';
 
 import { BaseRepository } from 'src/common/base/base.repository';
 
@@ -19,14 +21,38 @@ export class WorkTemplateRepository extends BaseRepository<WorkTemplateEntity> {
     return this.repository.findOne({
       where: {
         code,
+
+        deletedAt: IsNull(),
       },
     });
   }
 
-  async findDefault() {
+  async existsByCode(code: string) {
+    const count = await this.repository.count({
+      where: {
+        code,
+
+        deletedAt: IsNull(),
+      },
+    });
+
+    return count > 0;
+  }
+
+  async findDetail(id: number) {
     return this.repository.findOne({
       where: {
-        isDefault: true,
+        id,
+
+        deletedAt: IsNull(),
+      },
+
+      relations: {
+        workType: true,
+
+        workCategory: true,
+
+        initialStatus: true,
       },
     });
   }

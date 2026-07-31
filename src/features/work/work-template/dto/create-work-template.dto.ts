@@ -1,45 +1,54 @@
 import {
   IsBoolean,
   IsInt,
-  IsNumber,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
-  Min,
 } from 'class-validator';
 
 export class CreateWorkTemplateDto {
   @IsString()
+  @IsNotEmpty()
   @MaxLength(50)
   code!: string;
 
   @IsString()
+  @IsNotEmpty()
   @MaxLength(150)
   name!: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(1000)
   description?: string;
 
   @IsInt()
   workTypeId!: number;
 
+  @IsOptional()
   @IsInt()
-  workCategoryId!: number;
+  workCategoryId?: number;
+
+  @IsString()
+  @IsNotEmpty()
+  codePrefix!: string;
+
+  @IsOptional()
+  @IsString()
+  sequenceKey?: string;
 
   @IsInt()
   initialStatusId!: number;
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
   defaultPriority?: string;
 
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  estimatedHours?: number;
+  defaultEstimatedHours?: number;
+
+  @IsOptional()
+  defaultDueDays?: number;
 
   @IsOptional()
   @IsBoolean()
@@ -51,14 +60,5 @@ export class CreateWorkTemplateDto {
 
   @IsOptional()
   @IsBoolean()
-  isDefault?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  sortOrder?: number;
+  requireApproval?: boolean;
 }

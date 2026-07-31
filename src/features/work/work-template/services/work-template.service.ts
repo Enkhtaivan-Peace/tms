@@ -24,8 +24,11 @@ export class WorkTemplateService {
     private readonly queryRepository: WorkTemplateQueryRepository,
   ) {}
 
+  /**
+   * Create template
+   */
   async create(dto: CreateWorkTemplateDto) {
-    const exists = await this.repository.findByCode(dto.code);
+    const exists = await this.repository.existsByCode(dto.code);
 
     if (exists) {
       throw new ConflictException('Work template code already exists');
@@ -36,58 +39,55 @@ export class WorkTemplateService {
     return this.repository.create(entity);
   }
 
+  /**
+   * List
+   */
   async findAll(query: QueryWorkTemplateDto) {
     return this.queryRepository.findAll(query);
   }
 
+  /**
+   * Detail
+   */
   async findOne(id: number) {
-    const result = await this.repository.findById(id, {
-      workType: true,
-      workCategory: true,
-      initialStatus: true,
-    });
+    const template = await this.repository.findDetail(id);
 
-    if (!result) {
+    if (!template) {
       throw new NotFoundException('Work template not found');
     }
 
-    return result;
+    return template;
   }
 
-  async update(id: number, dto: UpdateWorkTemplateDto) {
-    const template = await this.findOne(id);
+  /**
+   * Update
+   */
+  async update(
+    id: number,
 
-    if (dto.code && dto.code !== template.code) {
-      const exists = await this.repository.findByCode(dto.code);
+    dto: UpdateWorkTemplateDto,
+  ) {
+    const template = await this.repository.findDetail(id);
 
-      if (exists) {
-        throw new ConflictException('Work template code already exists');
-      }
+    if (!template) {
+      throw new NotFoundException('Work template not found');
     }
 
-    WorkTemplateMapper.updateEntity(template, dto);
+    await this.repository.update(id, dto);
 
-    return this.repository.create(template);
+    return this.findOne(id);
   }
 
+  /**
+   * Soft delete
+   */
   async remove(id: number) {
-    await this.findOne(id);
+    const template = await this.repository.findDetail(id);
+
+    if (!template) {
+      throw new NotFoundException('Work template not found');
+    }
 
     return this.repository.softDelete(id);
-  }
-
-  async setDefault(id: number) {
-    await this.repository.updateWhere(
-      {
-        isDefault: true,
-      },
-      {
-        isDefault: false,
-      },
-    );
-
-    return this.repository.update(id, {
-      isDefault: true,
-    });
   }
 }

@@ -1,9 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 import { BaseEntity } from 'src/common/base/base.entity';
 
 import { WorkTypeEntity } from '../../work-type/entities/work-type.entity';
+
 import { WorkCategoryEntity } from '../../work-category/entities/work-category.entity';
+
 import { WorkStatusEntity } from '../../work-status/entities/work-status.entity';
 
 @Entity({
@@ -24,12 +26,14 @@ export class WorkTemplateEntity extends BaseEntity {
   name!: string;
 
   @Column({
-    type: 'varchar',
-    length: 1000,
+    type: 'text',
     nullable: true,
   })
   description?: string;
 
+  /**
+   * Work Type
+   */
   @Column({
     name: 'work_type_id',
     type: 'bigint',
@@ -42,18 +46,38 @@ export class WorkTemplateEntity extends BaseEntity {
   })
   workType!: WorkTypeEntity;
 
+  /**
+   * Work Category
+   */
   @Column({
     name: 'work_category_id',
     type: 'bigint',
+    nullable: true,
   })
-  workCategoryId!: number;
+  workCategoryId?: number;
 
   @ManyToOne(() => WorkCategoryEntity)
   @JoinColumn({
     name: 'work_category_id',
   })
-  workCategory!: WorkCategoryEntity;
+  workCategory?: WorkCategoryEntity;
 
+  /**
+   * Sequence key
+   *
+   * TASK_SEQUENCE
+   */
+  @Column({
+    name: 'sequence_key',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  sequenceKey?: string;
+
+  /**
+   * Initial workflow status
+   */
   @Column({
     name: 'initial_status_id',
     type: 'bigint',
@@ -66,6 +90,9 @@ export class WorkTemplateEntity extends BaseEntity {
   })
   initialStatus!: WorkStatusEntity;
 
+  /**
+   * Default priority
+   */
   @Column({
     name: 'default_priority',
     type: 'varchar',
@@ -74,15 +101,34 @@ export class WorkTemplateEntity extends BaseEntity {
   })
   defaultPriority!: string;
 
+  /**
+   * Default estimate
+   */
   @Column({
-    name: 'estimated_hours',
+    name: 'default_estimated_hours',
     type: 'decimal',
-    precision: 8,
+    precision: 10,
     scale: 2,
     default: 0,
   })
-  estimatedHours!: number;
+  defaultEstimatedHours!: number;
 
+  /**
+   * Due date calculation
+   *
+   * Example:
+   * +7 days
+   */
+  @Column({
+    name: 'default_due_days',
+    type: 'int',
+    default: 0,
+  })
+  defaultDueDays!: number;
+
+  /**
+   * Rules
+   */
   @Column({
     name: 'allow_attachment',
     type: 'boolean',
@@ -98,11 +144,11 @@ export class WorkTemplateEntity extends BaseEntity {
   allowComment!: boolean;
 
   @Column({
-    name: 'is_default',
+    name: 'require_approval',
     type: 'boolean',
     default: false,
   })
-  isDefault!: boolean;
+  requireApproval!: boolean;
 
   @Column({
     name: 'is_active',
@@ -112,11 +158,11 @@ export class WorkTemplateEntity extends BaseEntity {
   isActive!: boolean;
 
   @Column({
-    name: 'sort_order',
-    type: 'int',
-    default: 0,
+    name: 'is_default',
+    type: 'boolean',
+    default: false,
   })
-  sortOrder!: number;
+  isDefault!: boolean;
 
   @Column({
     name: 'created_at',

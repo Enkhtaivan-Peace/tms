@@ -25,6 +25,6 @@ import { WorkTemplateQueryRepository } from './repositories/work-template-query.
     WorkTemplateQueryRepository,
   ],
 
-  exports: [WorkTemplateService, WorkTemplateRepository],
+  exports: [WorkTemplateRepository],
 })
 export class WorkTemplateModule {}

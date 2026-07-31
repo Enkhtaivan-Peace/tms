@@ -10,6 +10,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { DepartmentModule } from './features/org/department/department.module';
 import { TeamModule } from './features/org/team/team.module';
 import { WorkModule } from './features/work/work.module';
+import { SequenceModule } from './common/sequence/sequence.module';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { WorkModule } from './features/work/work.module';
         autoLogging: true,
       },
     }),
-
+    SequenceModule,
     IamModule,
     DepartmentModule,
     TeamModule,
