@@ -7,6 +7,8 @@ import {
 import { RoleRepository } from '../repositories/role.repository';
 
 import { RolePermissionRepository } from '../repositories/role-permission.repository';
+import { SequenceService } from 'src/common/sequence/services/sequence.service';
+import { CreateRoleDto } from '../dto/create-role.dto';
 
 @Injectable()
 export class RolesService {
@@ -14,6 +16,7 @@ export class RolesService {
     private readonly roleRepository: RoleRepository,
 
     private readonly rolePermissionRepository: RolePermissionRepository,
+    private readonly sequenceService: SequenceService,
   ) {}
 
   async findAll() {
@@ -36,14 +39,13 @@ export class RolesService {
     return role;
   }
 
-  async create(data: any) {
-    const exists = await this.roleRepository.codeExists(data.code);
+  async create(data: CreateRoleDto) {
+    const code = await this.sequenceService.next('ROLE');
 
-    if (exists) {
-      throw new ConflictException('Role code exists');
-    }
-
-    return this.roleRepository.create(data);
+    return this.roleRepository.create({
+      ...data,
+      code,
+    });
   }
 
   async update(id: number, data: any) {

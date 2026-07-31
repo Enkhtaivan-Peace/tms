@@ -3,23 +3,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 
 import { UserRoleRepository } from '../repositories/user-role.repository';
+import { UserQueryRepository } from '../repositories/user-query.repository';
+import { UserFilterDto } from '../dto/user-filter.dto copy';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly userRepository: UserRepository,
-
+    private readonly queryRepository: UserQueryRepository,
     private readonly userRoleRepository: UserRoleRepository,
   ) {}
 
-  async findAll() {
-    return this.userRepository.findAll({
-      relations: {
-        userRoles: {
-          role: true,
-        },
-      },
-    });
+  async findAll(filter: UserFilterDto) {
+    return this.queryRepository.findAll(filter);
   }
 
   async findOne(id: number) {

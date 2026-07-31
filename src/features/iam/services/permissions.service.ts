@@ -6,12 +6,19 @@ import {
 
 import { PermissionRepository } from '../repositories/permission.repository';
 
+import { CreatePermissionDto } from '../dto/create-permission.dto';
+import { PermissionFilterDto } from '../dto/permission-filter.dto';
+import { PermissionQueryRepository } from '../repositories/permission-query.repository copy';
+
 @Injectable()
 export class PermissionsService {
-  constructor(private readonly permissionRepository: PermissionRepository) {}
+  constructor(
+    private readonly permissionRepository: PermissionRepository,
+    private readonly queryRepository: PermissionQueryRepository,
+  ) {}
 
-  async findAll() {
-    return this.permissionRepository.findAll();
+  findAll(filter: PermissionFilterDto) {
+    return this.queryRepository.findAll(filter);
   }
 
   async findOne(id: number) {
@@ -24,14 +31,10 @@ export class PermissionsService {
     return permission;
   }
 
-  async create(data: any) {
-    const exists = await this.permissionRepository.codeExists(data.code);
-
-    if (exists) {
-      throw new ConflictException('Permission exists');
-    }
-
-    return this.permissionRepository.create(data);
+  async create(data: CreatePermissionDto) {
+    return this.permissionRepository.create({
+      ...data,
+    });
   }
 
   async remove(id: number) {

@@ -5,7 +5,7 @@ import { IsNull } from 'typeorm';
 import { AssignmentRole } from '../../work-item-assignment/enum/work-item-assignment.enum';
 
 import { AssignmentHistoryFilterDto } from '../dto/assignment-history-filter.dto';
-import { WorkItemAssignmentHistoryRepository } from '../repositories/work-item-assignment.repository';
+import { WorkItemAssignmentHistoryRepository } from '../repositories/work-item-assignment-history.repository';
 import { WorkItemAssignmentEntity } from '../../work-item-assignment/entities/work-item-assignment.entity';
 import { AssignmentHistoryAction } from '../enum/work-item-assignment-action.enum';
 

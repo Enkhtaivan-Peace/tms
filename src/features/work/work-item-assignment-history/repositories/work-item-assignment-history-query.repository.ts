@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { WorkItemAssignmentHistoryRepository } from './work-item-assignment.repository';
+import { WorkItemAssignmentHistoryRepository } from './work-item-assignment-history.repository';
 import { IsNull } from 'typeorm';
 
 @Injectable()

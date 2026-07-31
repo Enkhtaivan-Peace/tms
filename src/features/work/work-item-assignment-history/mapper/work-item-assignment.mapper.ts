@@ -1,5 +1,4 @@
-import { WorkTypeEntity } from '../entities/work-item-assignment-history.entity';
-
+import { WorkTypeEntity } from '../../work-type/entities/work-type.entity';
 import { WorkTypeResponseDto } from '../dto/work-item-assignment-response.dto';
 
 export class WorkTypeMapper {

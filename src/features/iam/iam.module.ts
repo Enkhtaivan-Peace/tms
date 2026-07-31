@@ -30,6 +30,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
+import { SequenceModule } from 'src/common/sequence/sequence.module';
+import { PermissionQueryRepository } from './repositories/permission-query.repository copy';
+import { UserQueryRepository } from './repositories/user-query.repository';
 
 @Module({
   imports: [
@@ -53,6 +56,7 @@ import { ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    SequenceModule,
   ],
   controllers: [
     AuthController,
@@ -62,8 +66,10 @@ import { ConfigService } from '@nestjs/config';
   ],
   providers: [
     UserRepository,
+    UserQueryRepository,
     RoleRepository,
     PermissionRepository,
+    PermissionQueryRepository,
     UserRoleRepository,
     RolePermissionRepository,
     AuthService,

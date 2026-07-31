@@ -6,17 +6,22 @@ import {
   Delete,
   Body,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { UsersService } from '../services/users.service';
+import { UserFilterDto } from '../dto/user-filter.dto copy';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query()
+    filter: UserFilterDto,
+  ) {
+    return this.usersService.findAll(filter);
   }
 
   @Get(':id')

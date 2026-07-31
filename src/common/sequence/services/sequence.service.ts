@@ -8,9 +8,15 @@ import { SequenceEntity } from '../entities/sequence.entity';
 export class SequenceService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async next(code: string): Promise<string> {
+  async next(
+    code: string,
+
+    options?: {
+      prefixLength?: number;
+    },
+  ): Promise<string> {
     return this.dataSource.transaction(async (manager) => {
-      const sequence = await manager.findOne(SequenceEntity, {
+      let sequence = await manager.findOne(SequenceEntity, {
         where: {
           code,
         },
@@ -20,8 +26,19 @@ export class SequenceService {
         },
       });
 
+      /**
+       * Auto create sequence
+       */
       if (!sequence) {
-        throw new Error(`Sequence ${code} not found`);
+        sequence = manager.create(SequenceEntity, {
+          code,
+
+          currentNumber: 0,
+
+          prefixLength: options?.prefixLength ?? 6,
+        });
+
+        await manager.save(sequence);
       }
 
       sequence.currentNumber++;

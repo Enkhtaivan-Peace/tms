@@ -3,10 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { Repository, IsNull } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
-
-import { WorkTypeEntity } from '../entities/work-item-assignment.entity';
-
-import { QueryWorkTypeDto } from '../dto/change-assignment-role.dto.ts';
+import { WorkTypeEntity } from '../../work-type/entities/work-type.entity';
+import { QueryWorkTypeDto } from '../../work-type/dto/query-work-type.dto';
 
 @Injectable()
 export class WorkTypeQueryRepository {
