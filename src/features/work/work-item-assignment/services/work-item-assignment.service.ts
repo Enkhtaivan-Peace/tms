@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { WorkItemAssignmentRepository } from '../repositories/work-item-assignment.repository';
 
@@ -15,6 +16,9 @@ import { WorkItemAssignmentEntity } from '../entities/work-item-assignment.entit
 import { IsNull } from 'typeorm';
 import { AssignmentRole } from '../enum/work-item-assignment.enum';
 import { WorkItemAssignmentHistoryService } from '../../work-item-assignment-history/services/work-item-assignment-history.service';
+import { WorkItemAssignmentCreatedEvent } from '../../events/work-item-assignment-created.event';
+import { WorkItemAssignmentRoleChangedEvent } from '../../events/work-item-assignment-role-changed.event';
+import { WorkItemAssignmentRemovedEvent } from '../../events/work-item-assignment-removed.event';
 
 @Injectable()
 export class WorkItemAssignmentService {
@@ -22,6 +26,7 @@ export class WorkItemAssignmentService {
     private readonly repository: WorkItemAssignmentRepository,
 
     private readonly historyService: WorkItemAssignmentHistoryService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -54,77 +59,33 @@ export class WorkItemAssignmentService {
     dto: AssignWorkItemDto,
 
     actorId: number,
-  ): Promise<WorkItemAssignmentEntity> {
-    /**
-     * User or Team required
-     */
-    if (!dto.userId && !dto.teamId) {
-      throw new BadRequestException('User or Team is required');
-    }
-
-    /**
-     * OWNER duplicate check
-     */
-    if (dto.role === AssignmentRole.OWNER) {
-      const ownerExists = await this.repository.exists({
+  ) {
+    return this.repository.transaction(async (manager) => {
+      const assignment = await this.repository.create({
         workItemId,
 
-        role: AssignmentRole.OWNER,
+        userId: dto.userId,
 
-        deletedAt: IsNull(),
+        teamId: dto.teamId,
+
+        role: dto.role,
+
+        assignedBy: actorId,
       });
 
-      if (ownerExists) {
-        throw new BadRequestException('WorkItem already has OWNER');
-      }
-    }
+      await this.historyService.assigned(
+        assignment,
 
-    /**
-     * Duplicate assignment check
-     */
-    const exists = await this.repository.exists({
-      workItemId,
+        actorId,
+      );
 
-      userId: dto.userId,
+      this.eventEmitter.emit(
+        'work-item.assignment.created',
+        new WorkItemAssignmentCreatedEvent(assignment, actorId),
+      );
 
-      teamId: dto.teamId,
-
-      role: dto.role,
-
-      deletedAt: IsNull(),
+      return assignment;
     });
-
-    if (exists) {
-      throw new BadRequestException('Assignment already exists');
-    }
-
-    /**
-     * Create assignment
-     */
-    const assignment = await this.repository.create({
-      workItemId,
-
-      userId: dto.userId,
-
-      teamId: dto.teamId,
-
-      role: dto.role,
-
-      assignedBy: actorId,
-
-      assignedAt: new Date(),
-    });
-
-    /**
-     * Create history
-     */
-    await this.historyService.assigned(
-      assignment,
-
-      actorId,
-    );
-
-    return assignment;
   }
 
   /**
@@ -183,10 +144,24 @@ export class WorkItemAssignmentService {
       },
     );
 
-    /**
-     * to do:
-     * add ROLE_CHANGED history
-     */
+    await this.historyService.roleChanged(
+      assignment,
+      oldRole,
+      dto.role,
+      actorId,
+    );
+
+    this.eventEmitter.emit(
+      'work-item.assignment.role.changed',
+
+      new WorkItemAssignmentRoleChangedEvent(
+        assignmentId,
+        assignment.workItemId,
+        oldRole,
+        dto.role,
+        actorId,
+      ),
+    );
 
     return updated!;
   }
@@ -227,5 +202,16 @@ export class WorkItemAssignmentService {
     );
 
     await this.repository.softDelete(assignmentId);
+    this.eventEmitter.emit(
+      'work-item.assignment.removed',
+
+      new WorkItemAssignmentRemovedEvent(
+        assignment.id,
+
+        assignment.workItemId,
+
+        actorId,
+      ),
+    );
   }
 }
