@@ -14,6 +14,7 @@ import {
 import { DepartmentEntity } from '../../department/entities/department.entity';
 import { TeamStatus } from '../enums/team-status.enum';
 import { TeamMemberEntity } from './team-member.entity';
+import { WorkItemAssignmentEntity } from 'src/features/work/work-item-assignment/entities/work-item-assignment.entity';
 
 @Entity('org_teams')
 export class TeamEntity extends BaseEntity {
@@ -63,6 +64,9 @@ export class TeamEntity extends BaseEntity {
     default: TeamStatus.ACTIVE,
   })
   status!: TeamStatus;
+
+  @OneToMany(() => WorkItemAssignmentEntity, (assignment) => assignment.team)
+  assignments!: WorkItemAssignmentEntity[];
 
   @OneToMany(() => TeamMemberEntity, (member) => member.team, {
     cascade: true,

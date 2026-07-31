@@ -1,10 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 import { BaseEntity } from 'src/common/base/base.entity';
 
 import { WorkTemplateEntity } from '../../work-template/entities/work-template.entity';
 
 import { WorkStatusEntity } from '../../work-status/entities/work-status.entity';
+import { WorkItemAssignmentEntity } from '../../work-item-assignment/entities/work-item-assignment.entity';
 
 @Entity({
   name: 'work_items',
@@ -116,6 +117,12 @@ export class WorkItemEntity extends BaseEntity {
     nullable: true,
   })
   dueDate?: Date;
+
+  @OneToMany(
+    () => WorkItemAssignmentEntity,
+    (assignment) => assignment.workItem,
+  )
+  assignments!: WorkItemAssignmentEntity[];
 
   /**
    * Completed timestamp

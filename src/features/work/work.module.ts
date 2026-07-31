@@ -6,6 +6,8 @@ import { WorkStatusModule } from './work-status/work-status.module';
 import { WorkStatusTransitionModule } from './work-status-transition/work-status-transition.module';
 import { WorkTemplateModule } from './work-template/work-template.module';
 import { WorkTemplateStatusModule } from './work-template-status/work-template-status.module';
+import { WorkItemModule } from './work-item/work-item.module';
+import { WorkItemAssignmentModule } from './work-item-assignment/work-item-assignment.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { WorkTemplateStatusModule } from './work-template-status/work-template-s
     WorkStatusTransitionModule,
     WorkTemplateModule,
     WorkTemplateStatusModule,
+    WorkItemModule,
+    WorkItemAssignmentModule,
   ],
 })
 export class WorkModule {}

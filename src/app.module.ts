@@ -11,12 +11,15 @@ import { DepartmentModule } from './features/org/department/department.module';
 import { TeamModule } from './features/org/team/team.module';
 import { WorkModule } from './features/work/work.module';
 import { SequenceModule } from './common/sequence/sequence.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    EventEmitterModule.forRoot(),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
