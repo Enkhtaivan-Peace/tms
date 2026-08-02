@@ -48,4 +48,30 @@ export class WorkReviewDecisionRepository extends BaseRepository<WorkReviewDecis
       },
     });
   }
+
+  async findByWorkItem(workItemId: number) {
+    return this.repository.find({
+      where: {
+        reviewStep: {
+          review: {
+            workItem: {
+              id: workItemId,
+            },
+          },
+        },
+      },
+
+      relations: {
+        reviewStep: {
+          review: {
+            workItem: true,
+          },
+        },
+      },
+
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+  }
 }

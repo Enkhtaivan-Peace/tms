@@ -12,4 +12,16 @@ export class WorkItemAssignmentHistoryRepository extends BaseRepository<WorkItem
   ) {
     super(repository);
   }
+
+  async findByWorkItem(workItemId: number) {
+    return this.repository.find({
+      where: {
+        workItemId,
+      },
+
+      order: {
+        changedAt: 'ASC',
+      },
+    });
+  }
 }
