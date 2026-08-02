@@ -24,6 +24,21 @@ export class WorkReviewService {
       comment: dto.comment,
     });
   }
+  async resubmit(
+    reviewId: number,
+
+    userId: number,
+
+    dto: SubmitReviewDto,
+  ) {
+    return this.reviewEngine.resubmit({
+      reviewId,
+
+      userId,
+
+      comment: dto.comment,
+    });
+  }
 
   async approve(
     reviewId: number,

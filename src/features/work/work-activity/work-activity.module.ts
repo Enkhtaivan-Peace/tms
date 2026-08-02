@@ -11,18 +11,21 @@ import { WorkActivityQueryRepository } from './repositories/work-activity-query.
 import { WorkActivityService } from './services/work-activity.service';
 
 import { WorkActivityController } from './controller/work-activity.controller';
+import { WorkTimelineController } from './controller/work-timeline.controller';
+import { WorkTimelineQueryService } from './services/work-timeline-query.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([WorkActivityEntity])],
 
-  controllers: [WorkActivityController],
+  controllers: [WorkActivityController, WorkTimelineController],
 
   providers: [
     WorkActivityRepository,
     WorkActivityQueryRepository,
     WorkActivityService,
+    WorkTimelineQueryService,
   ],
 
-  exports: [WorkActivityService],
+  exports: [WorkActivityService, WorkTimelineQueryService],
 })
 export class WorkActivityModule {}

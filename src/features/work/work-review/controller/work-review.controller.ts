@@ -23,6 +23,20 @@ export class WorkReviewController {
     return this.workReviewService.submit(workItemId, userId, dto);
   }
 
+  @Post(':reviewId/resubmit')
+  async resubmit(
+    @Param('reviewId')
+    reviewId: number,
+
+    @CurrentUser('sub')
+    userId: number,
+
+    @Body()
+    dto: SubmitReviewDto,
+  ) {
+    return this.workReviewService.resubmit(reviewId, userId, dto);
+  }
+
   // Approve
   @Post(':reviewId/approve')
   async approve(

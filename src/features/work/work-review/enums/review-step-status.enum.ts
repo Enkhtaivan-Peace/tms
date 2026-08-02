@@ -3,4 +3,5 @@ export enum ReviewStepStatus {
   ACTIVE = 'ACTIVE',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
+  SKIPPED = 'SKIPPED',
 }

@@ -13,6 +13,8 @@ import { WorkReviewRepository } from './repositories/work-review.repository';
 import { WorkReviewStepRepository } from './repositories/work-review-step.repository';
 import { WorkReviewDecisionRepository } from './repositories/work-review-decision.repository';
 import { WorkReviewService } from './services/work-review.service';
+import { ReviewerResolverService } from './services/reviewer-resolver.service';
+import { ReviewPermissionService } from './services/review-permission.service';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { WorkReviewService } from './services/work-review.service';
     WorkReviewDecisionRepository,
     ReviewEngineService,
     WorkReviewService,
+    ReviewerResolverService,
+    ReviewPermissionService,
   ],
 
   exports: [ReviewEngineService],

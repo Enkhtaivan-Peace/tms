@@ -13,4 +13,5 @@ export enum WorkActivityAction {
   COMPLETED = 'COMPLETED',
   REOPENED = 'REOPENED',
   DELETED = 'DELETED',
+  COMMENT_ADDED = 'COMMENT_ADDED',
 }

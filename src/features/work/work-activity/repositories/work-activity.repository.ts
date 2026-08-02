@@ -82,6 +82,14 @@ export class WorkActivityRepository extends BaseRepository<WorkActivityEntity> {
     });
   }
 
+  async findTimeline(workItemId: number) {
+    return this.findAll({
+      where: {
+        workItemId,
+      },
+    });
+  }
+
   /**
    * Soft delete
    */

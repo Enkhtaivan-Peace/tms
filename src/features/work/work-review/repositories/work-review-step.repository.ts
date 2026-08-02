@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 
 import { WorkReviewStep } from '../entities/work-review-step.entity';
 import { BaseRepository } from 'src/common/base/base.repository';
+import { ReviewStepStatus } from '../enums/review-step-status.enum';
 
 @Injectable()
 export class WorkReviewStepRepository extends BaseRepository<WorkReviewStep> {
@@ -16,14 +17,16 @@ export class WorkReviewStepRepository extends BaseRepository<WorkReviewStep> {
     super(repository);
   }
 
-  async findCurrentStep(reviewId: number): Promise<WorkReviewStep | null> {
+  async findCurrentStep(reviewId: number) {
     return this.repository.findOne({
       where: {
         review: {
           id: reviewId,
         },
-
-        status: 'ACTIVE' as any,
+        status: ReviewStepStatus.ACTIVE,
+      },
+      relations: {
+        review: true,
       },
     });
   }
@@ -32,16 +35,35 @@ export class WorkReviewStepRepository extends BaseRepository<WorkReviewStep> {
     reviewId: number,
 
     currentOrder: number,
-  ): Promise<WorkReviewStep | null> {
+  ) {
     return this.repository.findOne({
       where: {
         review: {
           id: reviewId,
         },
+
+        stepOrder: currentOrder + 1,
       },
 
       order: {
         stepOrder: 'ASC',
+      },
+    });
+  }
+
+  /**
+   * First review step
+   *
+   * Used by resubmit flow
+   */
+  async findFirstStep(reviewId: number) {
+    return this.repository.findOne({
+      where: {
+        review: {
+          id: reviewId,
+        },
+
+        stepOrder: 1,
       },
     });
   }

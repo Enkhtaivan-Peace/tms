@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { WorkReviewRepository } from '../repositories/work-review.repository';
 import { WorkReviewStepRepository } from '../repositories/work-review-step.repository';
@@ -18,25 +22,22 @@ import { WorkReviewStep } from '../entities/work-review-step.entity';
 import { ReviewActionInput } from '../interfaces/review-action.input';
 import { WorkItemEntity } from '../../work-item/entities/work-item.entity';
 import { AssignmentRole } from '../../work-item-assignment/enum/work-item-assignment.enum';
+import { ReviewerResolverService } from './reviewer-resolver.service';
+import { ReviewPermissionService } from './review-permission.service';
 
 @Injectable()
 export class ReviewEngineService {
   constructor(
     private readonly dataSource: DataSource,
-
     private readonly reviewRepository: WorkReviewRepository,
-
     private readonly stepRepository: WorkReviewStepRepository,
-
     private readonly decisionRepository: WorkReviewDecisionRepository,
-
     private readonly workStatusTransitionService: WorkStatusTransitionService,
-
     private readonly workItemService: WorkItemService,
-
     private readonly workStatusService: WorkStatusService,
-
     private readonly workActivityService: WorkActivityService,
+    private readonly reviewerResolver: ReviewerResolverService,
+    private readonly permissionService: ReviewPermissionService,
   ) {}
 
   private resolveReviewer(
@@ -80,23 +81,34 @@ export class ReviewEngineService {
 
   private async createDefaultSteps(review: WorkReview) {
     const workItem = review.workItem;
-    const teamLeaderId = this.resolveReviewer(workItem, AssignmentRole.OWNER);
-    const qaUserId = this.resolveReviewer(workItem, AssignmentRole.REVIEWER);
+
+    const teamLeaderId =
+      await this.reviewerResolver.resolveTeamLeader(workItem);
+
+    const qaUserId = await this.reviewerResolver.resolveQA(workItem);
 
     return this.stepRepository.createMany([
       {
         review,
+
         stepOrder: 1,
+
         reviewType: ReviewType.TEAM_LEADER,
+
         reviewerId: teamLeaderId,
+
         status: ReviewStepStatus.ACTIVE,
       },
 
       {
         review,
+
         stepOrder: 2,
+
         reviewType: ReviewType.QA,
+
         reviewerId: qaUserId,
+
         status: ReviewStepStatus.WAITING,
       },
     ]);
@@ -232,6 +244,14 @@ export class ReviewEngineService {
   async approve(input: ReviewActionInput) {
     const step = await this.getCurrentStep(input.reviewId);
 
+    if (!step) {
+      throw new Error('Active review step not found');
+    }
+
+    this.permissionService.canReview(step, input.userId);
+
+    this.permissionService.canApprove(step);
+
     await this.saveDecision(step, input, ReviewDecision.APPROVE);
 
     await this.stepRepository.update(step.id, {
@@ -254,6 +274,13 @@ export class ReviewEngineService {
 
   async reject(input: ReviewActionInput) {
     const step = await this.getCurrentStep(input.reviewId);
+    if (!step) {
+      throw new NotFoundException('Review step not found');
+    }
+
+    this.permissionService.canReview(step, input.userId);
+
+    this.permissionService.canReject(step);
 
     await this.saveDecision(step, input, ReviewDecision.REJECT);
 
@@ -263,5 +290,64 @@ export class ReviewEngineService {
     });
 
     await this.rejectReview(input.reviewId, input.userId);
+  }
+
+  async requestChanges(input: {
+    reviewId: number;
+
+    userId: number;
+
+    comment?: string;
+  }) {
+    return this.dataSource.transaction(async () => {
+      const step = await this.getCurrentStep(input.reviewId);
+      this.permissionService.canReview(step, input.userId);
+
+      await this.decisionRepository.create({
+        reviewStep: step,
+        decision: ReviewDecision.REQUEST_CHANGES,
+        comment: input.comment,
+        decidedBy: input.userId,
+      });
+
+      await this.stepRepository.update(step.id, {
+        status: ReviewStepStatus.REJECTED,
+        completedAt: new Date(),
+      });
+
+      await this.reviewRepository.update(input.reviewId, {
+        status: WorkReviewStatus.REWORK_REQUIRED,
+      });
+    });
+  }
+
+  async resubmit(input: {
+    reviewId: number;
+
+    userId: number;
+
+    comment?: string;
+  }) {
+    return this.dataSource.transaction(async () => {
+      const review = await this.reviewRepository.findById(input.reviewId);
+
+      if (review?.status !== WorkReviewStatus.REWORK_REQUIRED) {
+        throw new BadRequestException('Review is not waiting for rework');
+      }
+
+      await this.reviewRepository.update(input.reviewId, {
+        status: WorkReviewStatus.IN_PROGRESS,
+
+        currentStep: 1,
+      });
+
+      const firstStep = await this.stepRepository.findFirstStep(input.reviewId);
+
+      await this.stepRepository.update(firstStep?.id!, {
+        status: ReviewStepStatus.ACTIVE,
+
+        startedAt: new Date(),
+      });
+    });
   }
 }

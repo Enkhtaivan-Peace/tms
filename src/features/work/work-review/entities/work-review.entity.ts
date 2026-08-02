@@ -32,7 +32,7 @@ export class WorkReview {
   @Column({
     type: 'enum',
     enum: WorkReviewStatus,
-    default: WorkReviewStatus.PENDING,
+    default: WorkReviewStatus.IN_PROGRESS,
   })
   status!: WorkReviewStatus;
 
