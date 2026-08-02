@@ -1,4 +1,11 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { WorkReviewService } from '../services/work-review.service';
 import { SubmitReviewDto } from '../dto/submit-review.dto';
 import { ReviewActionDto } from '../dto/review-action.dto';
@@ -60,5 +67,21 @@ export class WorkReviewController {
     @CurrentUser('sub') userId: number,
   ) {
     return this.workReviewService.reject(reviewId, userId, dto);
+  }
+
+  @Get(':reviewId/history')
+  async history(
+    @Param('reviewId', ParseIntPipe)
+    reviewId: number,
+  ) {
+    return this.workReviewService.history(reviewId);
+  }
+
+  @Get('pending')
+  async pending(
+    @CurrentUser('sub')
+    userId: number,
+  ) {
+    return this.workReviewService.findPending(userId);
   }
 }

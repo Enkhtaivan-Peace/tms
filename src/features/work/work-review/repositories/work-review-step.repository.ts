@@ -67,4 +67,24 @@ export class WorkReviewStepRepository extends BaseRepository<WorkReviewStep> {
       },
     });
   }
+
+  async findPendingByReviewer(reviewerId: number) {
+    return this.repository.find({
+      where: {
+        reviewerId,
+
+        status: ReviewStepStatus.ACTIVE,
+      },
+
+      relations: {
+        review: {
+          workItem: true,
+        },
+      },
+
+      order: {
+        startedAt: 'ASC',
+      },
+    });
+  }
 }

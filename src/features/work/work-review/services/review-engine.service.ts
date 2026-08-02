@@ -24,6 +24,8 @@ import { WorkItemEntity } from '../../work-item/entities/work-item.entity';
 import { AssignmentRole } from '../../work-item-assignment/enum/work-item-assignment.enum';
 import { ReviewerResolverService } from './reviewer-resolver.service';
 import { ReviewPermissionService } from './review-permission.service';
+import { WorkReviewHistoryMapper } from '../mapper/work-review-history.mapper';
+import { PendingReviewMapper } from '../mapper/pending-review.mapper';
 
 @Injectable()
 export class ReviewEngineService {
@@ -349,5 +351,17 @@ export class ReviewEngineService {
         startedAt: new Date(),
       });
     });
+  }
+
+  async history(reviewId: number) {
+    const decisions = await this.decisionRepository.findHistory(reviewId);
+
+    return decisions.map((item) => WorkReviewHistoryMapper.toDto(item));
+  }
+
+  async findPendingReviews(userId: number) {
+    const steps = await this.stepRepository.findPendingByReviewer(userId);
+
+    return steps.map((step) => PendingReviewMapper.toDto(step));
   }
 }

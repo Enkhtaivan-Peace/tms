@@ -71,4 +71,12 @@ export class WorkReviewService {
       comment: dto.comment,
     });
   }
+
+  async history(reviewId: number) {
+    return this.reviewEngine.history(reviewId);
+  }
+
+  async findPending(userId: number) {
+    return this.reviewEngine.findPendingReviews(userId);
+  }
 }

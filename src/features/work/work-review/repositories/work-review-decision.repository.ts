@@ -26,4 +26,26 @@ export class WorkReviewDecisionRepository extends BaseRepository<WorkReviewDecis
       },
     });
   }
+
+  async findHistory(reviewId: number) {
+    return this.repository.find({
+      where: {
+        reviewStep: {
+          review: {
+            id: reviewId,
+          },
+        },
+      },
+
+      relations: {
+        reviewStep: {
+          review: true,
+        },
+      },
+
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+  }
 }
