@@ -19,12 +19,10 @@ import { WorkStatusQueryRepository } from './repositories/work-status-query.repo
 
   providers: [
     WorkStatusService,
-
     WorkStatusRepository,
-
     WorkStatusQueryRepository,
   ],
 
-  exports: [WorkStatusRepository],
+  exports: [WorkStatusRepository, WorkStatusService],
 })
 export class WorkStatusModule {}

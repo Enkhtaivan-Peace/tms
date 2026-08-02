@@ -10,6 +10,7 @@ import { WorkItemModule } from './work-item/work-item.module';
 import { WorkItemAssignmentModule } from './work-item-assignment/work-item-assignment.module';
 import { NotificationModule } from './notification/notification.module';
 import { WorkItemAssignmentHistoryModule } from './work-item-assignment-history/work-item-assignment-history.module';
+import { WorkReviewModule } from './work-review/work-review.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WorkItemAssignmentHistoryModule } from './work-item-assignment-history/
     NotificationModule,
     WorkItemAssignmentModule,
     WorkItemAssignmentHistoryModule,
+    WorkReviewModule,
   ],
 })
 export class WorkModule {}

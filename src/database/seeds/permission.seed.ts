@@ -142,6 +142,24 @@ export async function seedPermissions(dataSource: DataSource) {
       name: 'Export Reports',
       module: 'REPORT',
     },
+    // work review
+    {
+      code: 'WORK_REVIEW_SUBMIT',
+      name: 'Submit work review',
+      module: 'WORK',
+    },
+
+    {
+      code: 'WORK_REVIEW_APPROVE',
+      name: 'Approve work review',
+      module: 'WORK',
+    },
+
+    {
+      code: 'WORK_REVIEW_REJECT',
+      name: 'Reject work review',
+      module: 'WORK',
+    },
   ];
 
   for (const permission of permissions) {

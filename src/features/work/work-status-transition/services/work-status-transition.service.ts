@@ -20,7 +20,6 @@ import { QueryWorkStatusTransitionDto } from '../dto/query-work-status-transitio
 export class WorkStatusTransitionService {
   constructor(
     private readonly repository: WorkStatusTransitionRepository,
-
     private readonly queryRepository: WorkStatusTransitionQueryRepository,
   ) {}
 
@@ -51,7 +50,7 @@ export class WorkStatusTransitionService {
    *
    * Example:
    *
-   * TODO -> IN_PROGRESS
+   * TO-DO -> IN_PROGRESS
    *
    */
   async canTransition(

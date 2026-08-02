@@ -5,22 +5,16 @@ import {
 } from '@nestjs/common';
 
 import { WorkStatusRepository } from '../repositories/work-status.repository';
-
 import { WorkStatusQueryRepository } from '../repositories/work-status-query.repository';
-
 import { CreateWorkStatusDto } from '../dto/create-work-status.dto';
-
 import { UpdateWorkStatusDto } from '../dto/update-work-status.dto';
-
 import { QueryWorkStatusDto } from '../dto/query-work-status.dto';
-
 import { WorkStatusMapper } from '../mapper/work-status.mapper';
 
 @Injectable()
 export class WorkStatusService {
   constructor(
     private readonly repository: WorkStatusRepository,
-
     private readonly queryRepository: WorkStatusQueryRepository,
   ) {}
 
@@ -43,6 +37,16 @@ export class WorkStatusService {
 
     if (!entity) {
       throw new NotFoundException('Work status not found');
+    }
+
+    return entity;
+  }
+
+  async findByCode(code: string) {
+    const entity = await this.repository.findByCode(code);
+
+    if (!entity) {
+      throw new NotFoundException(`Work status '${code}' not found`);
     }
 
     return entity;
