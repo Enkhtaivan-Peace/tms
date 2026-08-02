@@ -24,6 +24,9 @@ export class WorkStatusTransitionService {
     private readonly queryRepository: WorkStatusTransitionQueryRepository,
   ) {}
 
+  /**
+   * Create transition definition
+   */
   async create(dto: CreateWorkStatusTransitionDto) {
     this.validateTransition(dto.fromStatusId, dto.toStatusId);
 
@@ -41,6 +44,37 @@ export class WorkStatusTransitionService {
     return this.repository.create(entity);
   }
 
+  /**
+   * Runtime transition validation
+   *
+   * Used by WorkItemService
+   *
+   * Example:
+   *
+   * TODO -> IN_PROGRESS
+   *
+   */
+  async canTransition(
+    fromStatusId: number,
+
+    toStatusId: number,
+  ) {
+    this.validateTransition(fromStatusId, toStatusId);
+
+    const transition = await this.repository.findActiveTransition(
+      fromStatusId,
+      toStatusId,
+    );
+
+    if (!transition) {
+      throw new BadRequestException(
+        `Transition ${fromStatusId} -> ${toStatusId} is not allowed`,
+      );
+    }
+
+    return transition;
+  }
+
   async findAll(query: QueryWorkStatusTransitionDto) {
     return this.queryRepository.findAll(query);
   }
@@ -55,7 +89,11 @@ export class WorkStatusTransitionService {
     return result;
   }
 
-  async update(id: number, dto: UpdateWorkStatusTransitionDto) {
+  async update(
+    id: number,
+
+    dto: UpdateWorkStatusTransitionDto,
+  ) {
     const current = await this.findOne(id);
 
     if (dto.fromStatusId && dto.toStatusId) {
@@ -86,7 +124,11 @@ export class WorkStatusTransitionService {
     return this.repository.softDelete(id);
   }
 
-  private validateTransition(fromStatusId: number, toStatusId: number) {
+  private validateTransition(
+    fromStatusId: number,
+
+    toStatusId: number,
+  ) {
     if (fromStatusId === toStatusId) {
       throw new BadRequestException('Source and target status cannot be same');
     }

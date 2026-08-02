@@ -13,14 +13,16 @@ import { WorkItemQueryRepository } from './repositories/work-item-query.reposito
 import { WorkTemplateModule } from '../work-template/work-template.module';
 import { SequenceModule } from 'src/common/sequence/sequence.module';
 import { WorkItemController } from './controller/work-item.controller';
+import { WorkActivityModule } from '../work-activity/work-activity.module';
+import { WorkStatusTransitionModule } from '../work-status-transition/work-status-transition.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([WorkItemEntity]),
-
     WorkTemplateModule,
-
     SequenceModule,
+    WorkActivityModule,
+    WorkStatusTransitionModule,
   ],
 
   controllers: [WorkItemController],

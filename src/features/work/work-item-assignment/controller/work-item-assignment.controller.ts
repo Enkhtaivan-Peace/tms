@@ -31,27 +31,18 @@ export class WorkItemAssignmentController {
     return this.service.findByWorkItem(workItemId);
   }
 
-  /**
-   * Assign user/team
-   */
+  /* Assign user/team */
   @Post()
   async assign(
     @Param('workItemId', ParseIntPipe)
     workItemId: number,
-
     @Body()
     dto: AssignWorkItemDto,
 
-    @CurrentUser()
-    user: any,
+    @CurrentUser('sub')
+    userId: number,
   ) {
-    return this.service.assign(
-      workItemId,
-
-      dto,
-
-      user.id,
-    );
+    return this.service.assign(workItemId, dto, userId);
   }
 
   /**
@@ -61,11 +52,11 @@ export class WorkItemAssignmentController {
   async changeRole(
     @Param('assignmentId', ParseIntPipe)
     assignmentId: number,
-    @CurrentUser() user: any,
+    @CurrentUser('sub') userId: number,
     @Body()
     dto: ChangeAssignmentRoleDto,
   ) {
-    return this.service.changeRole(assignmentId, dto, user.sub);
+    return this.service.changeRole(assignmentId, dto, userId);
   }
 
   /**
@@ -75,8 +66,8 @@ export class WorkItemAssignmentController {
   async remove(
     @Param('assignmentId', ParseIntPipe)
     assignmentId: number,
-    @CurrentUser() user: any,
+    @CurrentUser('sub') userId: number,
   ) {
-    return this.service.remove(assignmentId, user.sub);
+    return this.service.remove(assignmentId, userId);
   }
 }

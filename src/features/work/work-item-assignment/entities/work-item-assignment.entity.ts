@@ -6,12 +6,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { WorkItemEntity } from '../../work-item/entities/work-item.entity';
 import { User } from 'src/features/iam/entities/user.entity';
 import { TeamEntity } from 'src/features/org/team/entities/team.entity';
 import { AssignmentRole } from '../enum/work-item-assignment.enum';
 import { BaseEntity } from 'src/common/base/base.entity';
+import { WorkItemAssignmentHistoryEntity } from '../../work-item-assignment-history/entities/work-item-assignment-history.entity';
 
 @Entity({
   name: 'work_item_assignments',
@@ -81,6 +83,12 @@ export class WorkItemAssignmentEntity extends BaseEntity {
     enum: AssignmentRole,
   })
   role!: AssignmentRole;
+
+  @OneToMany(
+    () => WorkItemAssignmentHistoryEntity,
+    (history) => history.assignment,
+  )
+  histories!: WorkItemAssignmentHistoryEntity[];
 
   /**
    * Who assigned

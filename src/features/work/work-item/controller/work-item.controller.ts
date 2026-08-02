@@ -65,17 +65,14 @@ export class WorkItemController {
   updateStatus(
     @Param('id', ParseIntPipe)
     id: number,
-
+    @CurrentUser('sub')
+    userId: number,
     @Body()
     body: {
       statusId: number;
     },
   ) {
-    return this.service.updateStatus(
-      id,
-
-      body.statusId,
-    );
+    return this.service.updateStatus(id, body.statusId, userId);
   }
 
   /**
@@ -109,7 +106,9 @@ export class WorkItemController {
   remove(
     @Param('id', ParseIntPipe)
     id: number,
+    @CurrentUser('sub')
+    userId: number,
   ) {
-    return this.service.remove(id);
+    return this.service.remove(id, userId);
   }
 }

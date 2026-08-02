@@ -17,7 +17,6 @@ import { AssignmentHistoryAction } from '../enum/work-item-assignment-action.enu
 
 @Entity({
   name: 'work_item_assignment_history',
-  schema: 'work',
 })
 export class WorkItemAssignmentHistoryEntity {
   @PrimaryGeneratedColumn({

@@ -19,6 +19,8 @@ import { WorkItemAssignmentHistoryService } from '../../work-item-assignment-his
 import { WorkItemAssignmentCreatedEvent } from '../../events/work-item-assignment-created.event';
 import { WorkItemAssignmentRoleChangedEvent } from '../../events/work-item-assignment-role-changed.event';
 import { WorkItemAssignmentRemovedEvent } from '../../events/work-item-assignment-removed.event';
+import { WorkActivityService } from '../../work-activity/services/work-activity.service';
+import { WorkActivityAction } from '../../work-activity/enums/work-activity-action.enum';
 
 @Injectable()
 export class WorkItemAssignmentService {
@@ -27,6 +29,7 @@ export class WorkItemAssignmentService {
 
     private readonly historyService: WorkItemAssignmentHistoryService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly activityService: WorkActivityService,
   ) {}
 
   /**
@@ -60,24 +63,46 @@ export class WorkItemAssignmentService {
 
     actorId: number,
   ) {
+    // if (dto.userId && dto.teamId) {
+    //   throw new BadRequestException('Only user or team can be assigned');
+    // }
     return this.repository.transaction(async (manager) => {
+      /* OWNER validation */
+      if (dto.role === AssignmentRole.OWNER) {
+        const exists = await this.repository.exists({
+          workItemId,
+          role: AssignmentRole.OWNER,
+          deletedAt: IsNull(),
+        });
+
+        if (exists) {
+          throw new BadRequestException('WorkItem already has OWNER');
+        }
+      }
+
       const assignment = await this.repository.create({
         workItemId,
-
         userId: dto.userId,
-
         teamId: dto.teamId,
-
         role: dto.role,
-
         assignedBy: actorId,
       });
 
-      await this.historyService.assigned(
-        assignment,
+      await this.historyService.assigned(assignment, actorId);
 
+      await this.activityService.create({
+        workItemId: assignment.workItemId,
         actorId,
-      );
+        action: WorkActivityAction.ASSIGNED,
+        newValue: {
+          assignmentId: assignment.id,
+          userId: assignment.userId,
+          teamId: assignment.teamId,
+          role: assignment.role,
+        },
+
+        description: 'Work item assigned',
+      });
 
       this.eventEmitter.emit(
         'work-item.assignment.created',
@@ -99,13 +124,10 @@ export class WorkItemAssignmentService {
     const assignment = await this.repository.findOne(
       {
         id: assignmentId,
-
         deletedAt: IsNull(),
       },
-
       {
         user: true,
-
         team: true,
       },
     );
@@ -123,9 +145,7 @@ export class WorkItemAssignmentService {
     ) {
       const ownerExists = await this.repository.exists({
         workItemId: assignment.workItemId,
-
         role: AssignmentRole.OWNER,
-
         deletedAt: IsNull(),
       });
 
@@ -136,13 +156,9 @@ export class WorkItemAssignmentService {
 
     const oldRole = assignment.role;
 
-    const updated = await this.repository.update(
-      assignmentId,
-
-      {
-        role: dto.role,
-      },
-    );
+    const updated = await this.repository.update(assignmentId, {
+      role: dto.role,
+    });
 
     await this.historyService.roleChanged(
       assignment,
@@ -150,6 +166,20 @@ export class WorkItemAssignmentService {
       dto.role,
       actorId,
     );
+
+    await this.activityService.create({
+      workItemId: assignment.workItemId,
+      actorId,
+      action: WorkActivityAction.ROLE_CHANGED,
+      fieldName: 'role',
+      oldValue: {
+        role: oldRole,
+      },
+      newValue: {
+        role: dto.role,
+      },
+      description: 'Assignment role changed',
+    });
 
     this.eventEmitter.emit(
       'work-item.assignment.role.changed',
@@ -169,21 +199,15 @@ export class WorkItemAssignmentService {
   /**
    * Remove assignment
    */
-  async remove(
-    assignmentId: number,
-
-    actorId: number,
-  ): Promise<void> {
+  async remove(assignmentId: number, actorId: number): Promise<void> {
     const assignment = await this.repository.findOne(
       {
         id: assignmentId,
-
         deletedAt: IsNull(),
       },
 
       {
         user: true,
-
         team: true,
       },
     );
@@ -195,11 +219,20 @@ export class WorkItemAssignmentService {
     /**
      * Create history before delete
      */
-    await this.historyService.removed(
-      assignment,
+    await this.historyService.removed(assignment, actorId);
 
+    await this.activityService.create({
+      workItemId: assignment.workItemId,
       actorId,
-    );
+      action: WorkActivityAction.UNASSIGNED,
+      oldValue: {
+        assignmentId: assignment.id,
+        userId: assignment.userId,
+        teamId: assignment.teamId,
+        role: assignment.role,
+      },
+      description: 'Work item assignment removed',
+    });
 
     await this.repository.softDelete(assignmentId);
     this.eventEmitter.emit(

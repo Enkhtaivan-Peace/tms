@@ -16,17 +16,19 @@ import { WorkItemMapper } from '../mapper/work-item.mapper';
 
 import { WorkTemplateRepository } from '../../work-template/repositories/work-template.repository';
 import { SequenceService } from 'src/common/sequence/services/sequence.service';
+import { WorkActivityService } from '../../work-activity/services/work-activity.service';
+import { WorkActivityAction } from '../../work-activity/enums/work-activity-action.enum';
+import { WorkStatusTransitionService } from '../../work-status-transition/services/work-status-transition.service';
 
 @Injectable()
 export class WorkItemService {
   constructor(
     private readonly repository: WorkItemRepository,
-
     private readonly queryRepository: WorkItemQueryRepository,
-
     private readonly templateRepository: WorkTemplateRepository,
-
     private readonly sequenceService: SequenceService,
+    private readonly activityService: WorkActivityService,
+    private readonly transitionService: WorkStatusTransitionService,
   ) {}
 
   /**
@@ -58,11 +60,8 @@ export class WorkItemService {
      * 4. Apply template defaults
      */
     entity.code = code;
-
     entity.statusId = template.initialStatusId;
-
     entity.priority = dto.priority ?? template.defaultPriority;
-
     entity.estimatedHours =
       dto.estimatedHours ?? template.defaultEstimatedHours;
 
@@ -81,8 +80,22 @@ export class WorkItemService {
      * 6. Audit
      */
     entity.createdBy = userId;
+    const created = await this.repository.create(entity);
 
-    return this.repository.create(entity);
+    await this.activityService.create({
+      workItemId: entity.id!,
+      actorId: userId,
+      action: WorkActivityAction.CREATED,
+      description: 'Work item created',
+      newValue: {
+        code: created.code,
+        title: created.title,
+        priority: created.priority,
+        statusId: created.statusId,
+      },
+    });
+
+    return created;
   }
 
   async findAll(query: QueryWorkItemDto) {
@@ -99,10 +112,75 @@ export class WorkItemService {
     return item;
   }
 
-  async updateStatus(
+  async updateStatus(id: number, statusId: number, actorId: number) {
+    const item = await this.repository.findActiveById(id);
+
+    if (!item) {
+      throw new NotFoundException('Work item not found');
+    }
+
+    const oldStatus = item.statusId;
+    const oldStatusId = item.statusId;
+    /**
+     * Validate workflow transition
+     */
+    await this.transitionService.canTransition(oldStatusId, statusId);
+    await this.repository.updateStatus(id, statusId);
+    await this.activityService.create({
+      workItemId: id,
+      actorId,
+      action: WorkActivityAction.STATUS_CHANGED,
+      fieldName: 'statusId',
+      oldValue: {
+        statusId: oldStatus,
+      },
+      newValue: {
+        statusId,
+      },
+      description: 'Work item status changed',
+    });
+
+    return this.findOne(id);
+  }
+
+  /**
+   * Update Work Item
+   */
+  async update(
     id: number,
 
-    statusId: number,
+    dto: any,
+
+    actorId: number,
+  ) {
+    const old = await this.findOne(id);
+    await this.repository.update(id, dto);
+    await this.activityService.create({
+      workItemId: id,
+      actorId,
+      action: WorkActivityAction.UPDATED,
+      oldValue: {
+        title: old.title,
+        description: old.description,
+        priority: old.priority,
+        estimatedHours: old.estimatedHours,
+        dueDate: old.dueDate,
+        statusId: old.statusId,
+      },
+      newValue: dto,
+      description: 'Work item updated',
+    });
+
+    return this.findOne(id);
+  }
+
+  /**
+   * Soft delete
+   */
+  async remove(
+    id: number,
+
+    actorId: number,
   ) {
     const item = await this.repository.findActiveById(id);
 
@@ -110,16 +188,17 @@ export class WorkItemService {
       throw new NotFoundException('Work item not found');
     }
 
-    return this.repository.updateStatus(id, statusId);
-  }
+    await this.repository.remove(id);
 
-  async remove(id: number) {
-    const item = await this.repository.findActiveById(id);
+    await this.activityService.create({
+      workItemId: id,
+      actorId,
+      action: WorkActivityAction.DELETED,
+      description: 'Work item deleted',
+    });
 
-    if (!item) {
-      throw new NotFoundException('Work item not found');
-    }
-
-    return this.repository.remove(id);
+    return {
+      success: true,
+    };
   }
 }

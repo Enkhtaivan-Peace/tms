@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { WorkStatusTransitionEntity } from './entities/work-status-transition.entity';
-
 import { WorkStatusTransitionRepository } from './repositories/work-status-transition.repository';
 
 import { WorkStatusTransitionQueryRepository } from './repositories/work-status-transition-query.repository';

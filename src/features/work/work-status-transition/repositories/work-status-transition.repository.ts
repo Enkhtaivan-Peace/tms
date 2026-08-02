@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { BaseRepository } from 'src/common/base/base.repository';
 
@@ -30,6 +30,22 @@ export class WorkStatusTransitionRepository extends BaseRepository<WorkStatusTra
       where: {
         fromStatusId,
         toStatusId,
+      },
+    });
+  }
+
+  async findActiveTransition(
+    fromStatusId: number,
+
+    toStatusId: number,
+  ) {
+    return this.repository.findOne({
+      where: {
+        fromStatusId,
+
+        toStatusId,
+
+        deletedAt: IsNull(),
       },
     });
   }
