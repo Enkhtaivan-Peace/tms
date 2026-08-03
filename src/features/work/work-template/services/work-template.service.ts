@@ -15,6 +15,9 @@ import { UpdateWorkTemplateDto } from '../dto/update-work-template.dto';
 import { QueryWorkTemplateDto } from '../dto/query-work-template.dto';
 
 import { WorkTemplateMapper } from '../mapper/work-template.mapper';
+import { WorkTemplateStatusRepository } from '../../work-template-status/repositories/work-template-status.repository';
+import { WorkTemplateEntity } from '../entities/work-template.entity';
+import { WorkTemplateStatusEntity } from '../../work-template-status/entities/work-template-status.entity';
 
 @Injectable()
 export class WorkTemplateService {
@@ -22,6 +25,7 @@ export class WorkTemplateService {
     private readonly repository: WorkTemplateRepository,
 
     private readonly queryRepository: WorkTemplateQueryRepository,
+    private readonly workTemplateStatusRepository: WorkTemplateStatusRepository,
   ) {}
 
   /**
@@ -34,9 +38,19 @@ export class WorkTemplateService {
       throw new ConflictException('Work template code already exists');
     }
 
-    const entity = WorkTemplateMapper.toEntity(dto);
+    return this.repository.transaction(async (manager) => {
+      const entity = WorkTemplateMapper.toEntity(dto);
+      const template = await manager.save(WorkTemplateEntity, entity);
 
-    return this.repository.create(entity);
+      await manager.save(WorkTemplateStatusEntity, {
+        workTemplateId: template.id,
+        workStatusId: dto.initialStatusId,
+        isInitial: true,
+        sortOrder: 1,
+        isActive: true,
+      });
+      return template;
+    });
   }
 
   /**

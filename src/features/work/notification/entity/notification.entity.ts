@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import { NotificationType } from '../enum/notification-type.enum';
   name: 'notifications',
   schema: 'notification',
 })
+@Index(['receiverId', 'isRead', 'createdAt'])
 export class NotificationEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
@@ -49,10 +51,17 @@ export class NotificationEntity {
   payload?: Record<string, any>;
 
   @Column({
+    name: 'is_read',
     type: 'boolean',
     default: false,
   })
-  read!: boolean;
+  isRead!: boolean;
+
+  @Column({
+    name: 'read_at',
+    nullable: true,
+  })
+  readAt?: Date;
 
   @CreateDateColumn({
     name: 'created_at',

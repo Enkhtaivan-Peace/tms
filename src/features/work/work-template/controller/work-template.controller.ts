@@ -9,13 +9,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-
 import { WorkTemplateService } from '../services/work-template.service';
-
 import { CreateWorkTemplateDto } from '../dto/create-work-template.dto';
-
 import { UpdateWorkTemplateDto } from '../dto/update-work-template.dto';
-
 import { QueryWorkTemplateDto } from '../dto/query-work-template.dto';
 
 @Controller('work-templates')
@@ -28,11 +24,13 @@ export class WorkTemplateController {
    * POST /work-templates
    */
   @Post()
-  create(
+  async create(
     @Body()
     dto: CreateWorkTemplateDto,
   ) {
-    return this.service.create(dto);
+    const createdTemplate = await this.service.create(dto);
+
+    return createdTemplate;
   }
 
   /**

@@ -8,27 +8,32 @@ import { NotificationType } from '../enum/notification-type.enum';
 export class NotificationService {
   constructor(private readonly repository: NotificationRepository) {}
 
-  async create(
-    receiverId: number,
-
-    type: NotificationType,
-
-    title: string,
-
-    message: string,
-
-    payload?: any,
-  ) {
+  async create({
+    receiverId,
+    type,
+    title,
+    message,
+    payload,
+  }: {
+    receiverId: number;
+    type: NotificationType;
+    title: string;
+    message: string;
+    payload?: any;
+  }) {
     return this.repository.create({
       receiverId,
-
       type,
-
       title,
-
       message,
-
       payload,
+    });
+  }
+
+  async markAsRead(id: number) {
+    return this.repository.update(id, {
+      isRead: true,
+      readAt: new Date(),
     });
   }
 }

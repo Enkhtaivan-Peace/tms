@@ -21,21 +21,16 @@ export class WorkItemAssignmentNotificationListener {
       return;
     }
 
-    await this.notificationService.create(
-      userId,
-
-      NotificationType.WORK_ITEM_ASSIGNED,
-
-      'New Work Item Assignment',
-
-      'You have been assigned to a work item',
-
-      {
+    await this.notificationService.create({
+      receiverId: userId,
+      type: NotificationType.WORK_ITEM_ASSIGNED,
+      title: 'New Work Item Assignment',
+      message: 'You have been assigned to a work item',
+      payload: {
         workItemId: event.assignment.workItemId,
-
         role: event.assignment.role,
       },
-    );
+    });
   }
 
   @OnEvent('work-item.assignment.role.changed')
