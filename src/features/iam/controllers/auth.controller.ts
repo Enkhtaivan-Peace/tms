@@ -6,7 +6,6 @@ import { LoginDto } from '../dto/login.dto';
 
 import { RegisterDto } from '../dto/register.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import type { JwtPayload } from 'src/common/helpers/interfaces/jwt-payload.interface';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { AuthGuard } from '../guards/auth.guard';
@@ -33,6 +32,7 @@ export class AuthController {
     return this.authService.logout(currentUser.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('refresh')
   refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refresh(dto.refreshToken!);

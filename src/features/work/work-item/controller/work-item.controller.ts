@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { WorkItemService } from '../services/work-item.service';
@@ -18,7 +19,9 @@ import { UpdateWorkItemDto } from '../dto/update-work-item.dto';
 
 import { QueryWorkItemDto } from '../dto/query-work-item.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/features/iam/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('work-items')
 export class WorkItemController {
   constructor(private readonly service: WorkItemService) {}
@@ -87,14 +90,10 @@ export class WorkItemController {
 
     @Body()
     dto: UpdateWorkItemDto,
+    @CurrentUser('sub')
+    userId: number,
   ) {
-    return {
-      message: 'Update work item - next implementation',
-
-      id,
-
-      dto,
-    };
+    return this.service.update(id, dto, userId);
   }
 
   /**

@@ -95,7 +95,7 @@ export class AuthService {
         username: user.username,
       },
       {
-        expiresIn: '15m',
+        expiresIn: '5d',
       },
     );
 
@@ -166,7 +166,7 @@ export class AuthService {
         username: user.username,
       },
       {
-        expiresIn: '15m',
+        expiresIn: '5d',
       },
     );
 

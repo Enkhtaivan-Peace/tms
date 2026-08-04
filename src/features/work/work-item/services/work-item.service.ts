@@ -83,7 +83,7 @@ export class WorkItemService {
     const created = await this.repository.create(entity);
 
     await this.activityService.create({
-      workItemId: entity.id!,
+      workItemId: created.id!,
       actorId: userId,
       action: WorkActivityAction.CREATED,
       description: 'Work item created',
@@ -119,40 +119,42 @@ export class WorkItemService {
       throw new NotFoundException('Work item not found');
     }
 
-    const oldStatus = item.statusId;
-    const oldStatusId = item.statusId;
+    const fromStatusId = item.statusId;
+
     /**
-     * Validate workflow transition
+     * 2. Validate workflow transition
+     *
+     * Example:
+     * ASSIGNED -> IN_PROGRESS
+     * IN_PROGRESS -> WAITING_REVIEW
      */
-    await this.transitionService.canTransition(oldStatusId, statusId);
+    const transition = await this.transitionService.canTransition(
+      fromStatusId,
+      statusId,
+    );
+
     await this.repository.updateStatus(id, statusId);
+
+    /** Create activity history **/
     await this.activityService.create({
       workItemId: id,
       actorId,
       action: WorkActivityAction.STATUS_CHANGED,
       fieldName: 'statusId',
       oldValue: {
-        statusId: oldStatus,
+        statusId: fromStatusId,
       },
       newValue: {
         statusId,
       },
-      description: 'Work item status changed',
+      description: transition.description ?? 'Work item status changed',
     });
 
     return this.findOne(id);
   }
 
-  /**
-   * Update Work Item
-   */
-  async update(
-    id: number,
-
-    dto: any,
-
-    actorId: number,
-  ) {
+  /*** Update Work Item */
+  async update(id: number, dto: any, actorId: number) {
     const old = await this.findOne(id);
     await this.repository.update(id, dto);
     await this.activityService.create({
@@ -177,11 +179,7 @@ export class WorkItemService {
   /**
    * Soft delete
    */
-  async remove(
-    id: number,
-
-    actorId: number,
-  ) {
+  async remove(id: number, actorId: number) {
     const item = await this.repository.findActiveById(id);
 
     if (!item) {

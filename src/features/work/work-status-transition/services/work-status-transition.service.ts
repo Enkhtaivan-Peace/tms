@@ -53,11 +53,7 @@ export class WorkStatusTransitionService {
    * TO-DO -> IN_PROGRESS
    *
    */
-  async canTransition(
-    fromStatusId: number,
-
-    toStatusId: number,
-  ) {
+  async canTransition(fromStatusId: number, toStatusId: number) {
     this.validateTransition(fromStatusId, toStatusId);
 
     const transition = await this.repository.findActiveTransition(
@@ -67,7 +63,7 @@ export class WorkStatusTransitionService {
 
     if (!transition) {
       throw new BadRequestException(
-        `Transition ${fromStatusId} -> ${toStatusId} is not allowed`,
+        `fromStatusId:${fromStatusId} статусаас toStatusId:${toStatusId} статус руу шилжих боломжгүй байна.`,
       );
     }
 

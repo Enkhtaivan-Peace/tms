@@ -31,6 +31,7 @@ export class TeamQueryRepository extends BaseQueryRepository<TeamEntity> {
 
       relations: {
         department: true,
+        assignments: true,
       },
     });
   }

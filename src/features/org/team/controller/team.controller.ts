@@ -31,6 +31,7 @@ export class TeamController {
     @Query()
     filter: TeamFilterDto,
   ) {
+    console.log('aaaaa');
     return this.service.findAll(filter);
   }
 

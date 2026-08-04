@@ -37,7 +37,8 @@ export class TeamMemberQueryRepository extends BaseQueryRepository<TeamMemberEnt
 
       relations: {
         team: {
-          department: true,
+          department: false,
+          assignments: true,
         },
       },
     });

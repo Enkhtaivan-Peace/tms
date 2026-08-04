@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 
 import { WorkItemAssignmentService } from '../services/work-item-assignment.service';
@@ -15,7 +16,9 @@ import { AssignWorkItemDto } from '../dto/assign-work-item.dto';
 
 import { ChangeAssignmentRoleDto } from '../dto/change-assignment-role.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/features/iam/guards/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('work-items/:workItemId/assignments')
 export class WorkItemAssignmentController {
   constructor(private readonly service: WorkItemAssignmentService) {}
@@ -42,6 +45,7 @@ export class WorkItemAssignmentController {
     @CurrentUser('sub')
     userId: number,
   ) {
+    console.log(dto, userId);
     return this.service.assign(workItemId, dto, userId);
   }
 

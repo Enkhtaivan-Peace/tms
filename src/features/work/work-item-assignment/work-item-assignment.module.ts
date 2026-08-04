@@ -8,6 +8,7 @@ import { WorkItemAssignmentRepository } from './repositories/work-item-assignmen
 import { WorkItemAssignmentService } from './services/work-item-assignment.service';
 import { WorkItemAssignmentHistoryModule } from '../work-item-assignment-history/work-item-assignment-history.module';
 import { WorkActivityModule } from '../work-activity/work-activity.module';
+import { WorkItemAssignmentController } from './controller/work-item-assignment.controller';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { WorkActivityModule } from '../work-activity/work-activity.module';
   ],
 
   providers: [WorkItemAssignmentRepository, WorkItemAssignmentService],
+
+  controllers: [WorkItemAssignmentController],
 
   exports: [WorkItemAssignmentService],
 })
