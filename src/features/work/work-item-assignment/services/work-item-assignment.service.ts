@@ -56,13 +56,7 @@ export class WorkItemAssignmentService {
   /**
    * Assign user/team to WorkItem
    */
-  async assign(
-    workItemId: number,
-
-    dto: AssignWorkItemDto,
-
-    actorId: number,
-  ) {
+  async assign(workItemId: number, dto: AssignWorkItemDto, actorId: number) {
     // if (dto.userId && dto.teamId) {
     //   throw new BadRequestException('Only user or team can be assigned');
     // }

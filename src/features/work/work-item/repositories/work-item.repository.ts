@@ -17,6 +17,69 @@ export class WorkItemRepository extends BaseRepository<WorkItemEntity> {
     super(repository);
   }
 
+  async findChildren(parentWorkItemId: number): Promise<WorkItemEntity[]> {
+    return this.repository.find({
+      where: {
+        parentWorkItemId,
+      },
+      relations: { status: true, assignments: true },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+  }
+
+  /**
+   * Get parent task
+   */
+  async findParent(workItemId: number): Promise<WorkItemEntity | null> {
+    const item = await this.repository.findOne({
+      where: {
+        id: workItemId,
+      },
+      relations: { parent: true },
+    });
+
+    return item?.parent ?? null;
+  }
+
+  /**
+   * Check has sub tasks
+   */
+  async existsChildren(parentWorkItemId: number): Promise<boolean> {
+    const count = await this.repository.count({
+      where: {
+        parentWorkItemId,
+      },
+    });
+
+    return count > 0;
+  }
+
+  /**
+   * Count sub tasks
+   */
+  async countChildren(parentWorkItemId: number): Promise<number> {
+    return this.repository.count({
+      where: {
+        parentWorkItemId,
+      },
+    });
+  }
+
+  /**
+   * Get tree root children
+   */
+  async findTree(workItemId: number): Promise<WorkItemEntity | null> {
+    return this.repository.findOne({
+      where: {
+        id: workItemId,
+      },
+      relations: {
+        children: true,
+      },
+    });
+  }
   /**
    * Find by business code
    *

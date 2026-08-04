@@ -20,6 +20,7 @@ import { UpdateWorkItemDto } from '../dto/update-work-item.dto';
 import { QueryWorkItemDto } from '../dto/query-work-item.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/features/iam/guards/jwt-auth.guard';
+import { CreateSubTaskDto } from '../dto/create-sub-task.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('work-items')
@@ -109,5 +110,43 @@ export class WorkItemController {
     userId: number,
   ) {
     return this.service.remove(id, userId);
+  }
+
+  @Post(':id/sub-tasks')
+  async createSubTask(
+    @Param('id', ParseIntPipe)
+    parentId: number,
+
+    @Body()
+    dto: CreateSubTaskDto,
+
+    @CurrentUser('sub')
+    userId: number,
+  ) {
+    return this.service.createSubTask(parentId, dto, userId);
+  }
+
+  @Get(':id/sub-tasks')
+  async findSubTasks(
+    @Param('id', ParseIntPipe)
+    parentId: number,
+  ) {
+    return this.service.findSubTasks(parentId);
+  }
+
+  @Get(':id/parent')
+  async findParent(
+    @Param('id', ParseIntPipe)
+    id: number,
+  ) {
+    return this.service.findParent(id);
+  }
+
+  @Get(':id/tree')
+  async getTree(
+    @Param('id', ParseIntPipe)
+    id: number,
+  ) {
+    return this.service.getTree(id);
   }
 }

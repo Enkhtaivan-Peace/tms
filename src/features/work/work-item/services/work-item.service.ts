@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { WorkItemRepository } from '../repositories/work-item.repository';
@@ -19,6 +20,11 @@ import { SequenceService } from 'src/common/sequence/services/sequence.service';
 import { WorkActivityService } from '../../work-activity/services/work-activity.service';
 import { WorkActivityAction } from '../../work-activity/enums/work-activity-action.enum';
 import { WorkStatusTransitionService } from '../../work-status-transition/services/work-status-transition.service';
+import { CreateSubTaskDto } from '../dto/create-sub-task.dto';
+import { WorkItemAssignmentService } from '../../work-item-assignment/services/work-item-assignment.service';
+import { AssignmentRole } from '../../work-item-assignment/enum/work-item-assignment.enum';
+import { WorkItemEntity } from '../entities/work-item.entity';
+import { WorkStatusService } from '../../work-status/services/work-status.service';
 
 @Injectable()
 export class WorkItemService {
@@ -29,6 +35,8 @@ export class WorkItemService {
     private readonly sequenceService: SequenceService,
     private readonly activityService: WorkActivityService,
     private readonly transitionService: WorkStatusTransitionService,
+    private readonly assignmentService: WorkItemAssignmentService,
+    private readonly statusService: WorkStatusService,
   ) {}
 
   /**
@@ -149,6 +157,7 @@ export class WorkItemService {
       },
       description: transition.description ?? 'Work item status changed',
     });
+    await this.handleSubTaskCompletion(item, statusId, actorId);
 
     return this.findOne(id);
   }
@@ -197,6 +206,174 @@ export class WorkItemService {
 
     return {
       success: true,
+    };
+  }
+
+  async createSubTask(parentId: number, dto: CreateSubTaskDto, userId: number) {
+    /**
+     * 1. Find parent
+     */
+    const parent = await this.repository.findDetail(parentId);
+
+    if (!parent) {
+      throw new NotFoundException('Parent work item not found');
+    }
+
+    /**
+     * 2. Validate parent status
+     *
+     * Completed task дотор
+     * sub task үүсгэхгүй
+     */
+    if (parent.status?.code === WorkActivityAction.COMPLETED) {
+      throw new BadRequestException(
+        'Cannot create sub task for completed work item',
+      );
+    }
+
+    /**
+     * 3. Generate child code
+     *
+     * Parent template sequence ашиглана
+     */
+    const code = await this.sequenceService.next(
+      parent.workTemplate.sequenceKey!,
+    );
+
+    const created = await this.repository.create({
+      code,
+      title: dto.title,
+      description: dto.description,
+      workTemplateId: parent.workTemplateId,
+      statusId: parent.statusId,
+      priority: dto.priority ?? parent.priority,
+      estimatedHours: dto.estimatedHours ?? 0,
+      parentWorkItemId: parent.id,
+      createdBy: userId,
+    });
+
+    /**
+     * 5. Assign user
+     */
+    if (dto.assigneeId) {
+      await this.assignmentService.assign(
+        created.id!,
+        {
+          userId: dto.assigneeId,
+          role: AssignmentRole.OWNER,
+        },
+        userId,
+      );
+    }
+
+    /**
+     * 6. Activity
+     */
+    await this.activityService.create({
+      workItemId: created.id!,
+      actorId: userId,
+      action: WorkActivityAction.CREATED,
+      description: WorkActivityAction.SUB_TASK_CREATED,
+      newValue: {
+        parentWorkItemId: parent.id,
+        code: created.code,
+        title: created.title,
+      },
+    });
+
+    return created;
+  }
+
+  async findSubTasks(parentId: number) {
+    const parent = await this.repository.findActiveById(parentId);
+
+    if (!parent) {
+      throw new NotFoundException('Parent work item not found');
+    }
+
+    return this.repository.findChildren(parentId);
+  }
+
+  async findParent(id: number) {
+    const item = await this.repository.findActiveById(id);
+
+    if (!item) {
+      throw new NotFoundException('Work item not found');
+    }
+
+    return this.repository.findParent(id);
+  }
+
+  async getTree(id: number) {
+    const item = await this.repository.findTree(id);
+
+    if (!item) {
+      throw new NotFoundException('Work item not found');
+    }
+
+    return item;
+  }
+
+  private async handleSubTaskCompletion(
+    item: WorkItemEntity,
+    newStatusId: number,
+    actorId: number,
+  ) {
+    if (!item.parentWorkItemId) {
+      return;
+    }
+
+    const status = await this.statusService.findOne(newStatusId);
+
+    if (status.code !== 'COMPLETED') {
+      return;
+    }
+
+    await this.activityService.create({
+      workItemId: item.id!,
+
+      actorId,
+
+      action: WorkActivityAction.SUB_TASK_COMPLETED,
+
+      description: 'Sub task completed',
+
+      newValue: {
+        statusId: newStatusId,
+        parentWorkItemId: item.parentWorkItemId,
+      },
+    });
+
+    await this.calculateParentProgress(item.parentWorkItemId);
+  }
+
+  async calculateParentProgress(parentId: number) {
+    const children = await this.repository.findChildren(parentId);
+
+    if (!children.length) {
+      return {
+        progress: 0,
+        total: 0,
+        completed: 0,
+      };
+    }
+
+    const total = children.length;
+
+    const completed = children.filter(
+      (child) => child.status?.code === 'COMPLETED',
+    ).length;
+
+    const progress = Math.round((completed / total) * 100);
+
+    return {
+      parentId,
+
+      total,
+
+      completed,
+
+      progress,
     };
   }
 }

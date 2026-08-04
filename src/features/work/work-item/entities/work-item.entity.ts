@@ -69,6 +69,25 @@ export class WorkItemEntity extends BaseEntity {
   })
   statusId!: number;
 
+  @Column({
+    name: 'parent_work_item_id',
+    type: 'bigint',
+    nullable: true,
+  })
+  parentWorkItemId?: number;
+
+  @ManyToOne(() => WorkItemEntity, (workItem) => workItem.children, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({
+    name: 'parent_work_item_id',
+  })
+  parent?: WorkItemEntity;
+
+  @OneToMany(() => WorkItemEntity, (workItem) => workItem.parent)
+  children?: WorkItemEntity[];
+
   @ManyToOne(() => WorkStatusEntity)
   @JoinColumn({
     name: 'status_id',
