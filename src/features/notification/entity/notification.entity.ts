@@ -3,29 +3,33 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Index,
-  PrimaryGeneratedColumn,
+  JoinColumn,
+  ManyToOne,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { NotificationType } from '../enum/notification-type.enum';
+import { BaseEntity } from 'src/common/base/base.entity';
 
-@Entity({
-  name: 'notifications',
-  schema: 'notification',
-})
-@Index(['receiverId', 'isRead', 'createdAt'])
-export class NotificationEntity {
-  @PrimaryGeneratedColumn({
-    type: 'bigint',
+import { NotificationType } from '../enum/notification-type.enum';
+import { NotificationPriority } from '../enum/notification-priority.enum';
+import { User } from 'src/features/iam/entities/user.entity';
+
+@Entity('notifications')
+export class NotificationEntity extends BaseEntity {
+  @ManyToOne(() => User, {
+    nullable: false,
+    onDelete: 'CASCADE',
   })
-  id!: number;
+  @JoinColumn({
+    name: 'recipient_id',
+  })
+  recipient!: User;
 
   @Column({
+    name: 'recipient_id',
     type: 'bigint',
-    name: 'receiver_id',
   })
-  receiverId!: number;
+  recipientId!: number;
 
   @Column({
     type: 'enum',
@@ -34,7 +38,13 @@ export class NotificationEntity {
   type!: NotificationType;
 
   @Column({
-    type: 'varchar',
+    type: 'enum',
+    enum: NotificationPriority,
+    default: NotificationPriority.NORMAL,
+  })
+  priority!: NotificationPriority;
+
+  @Column({
     length: 255,
   })
   title!: string;
@@ -45,14 +55,20 @@ export class NotificationEntity {
   message!: string;
 
   @Column({
-    type: 'json',
+    name: 'reference_type',
     nullable: true,
   })
-  payload?: Record<string, any>;
+  referenceType?: string;
+
+  @Column({
+    name: 'reference_id',
+    type: 'bigint',
+    nullable: true,
+  })
+  referenceId?: number;
 
   @Column({
     name: 'is_read',
-    type: 'boolean',
     default: false,
   })
   isRead!: boolean;
@@ -75,7 +91,6 @@ export class NotificationEntity {
 
   @DeleteDateColumn({
     name: 'deleted_at',
-    nullable: true,
   })
   deletedAt?: Date;
 }

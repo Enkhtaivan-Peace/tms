@@ -7,21 +7,13 @@ export class TimelineMapper {
   static activity(activity: any): WorkTimelineResponseDto {
     return {
       id: activity.id,
-
-      type: TimelineEventType.STATUS_CHANGED,
-
-      title: activity.activityType,
-
+      type: activity.action,
+      title: activity.action,
       description: activity.description,
-
-      actor: activity.actor
-        ? {
-            id: activity.actor.id,
-            name: activity.actor.name,
-          }
-        : undefined,
-
-      metadata: activity.metadata,
+      metadata: {
+        oldValue: activity.oldValue,
+        newValue: activity.newValue,
+      },
 
       createdAt: activity.createdAt,
     };

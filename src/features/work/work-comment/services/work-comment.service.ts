@@ -12,6 +12,13 @@ import { UpdateWorkCommentDto } from '../dto/update-work-comment.dto';
 import { WorkCommentMapper } from '../mapper/work-comment.mapper';
 
 import { WorkItemRepository } from '../../work-item/repositories/work-item.repository';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { CommentCreatedEvent } from '../events/comment-created.event';
+
+import { CommentUpdatedEvent } from '../events/comment-updated.event';
+
+import { CommentDeletedEvent } from '../events/comment-deleted.event';
 
 @Injectable()
 export class WorkCommentService {
@@ -19,6 +26,7 @@ export class WorkCommentService {
     private readonly workCommentRepository: WorkCommentRepository,
 
     private readonly workItemRepository: WorkItemRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -43,7 +51,19 @@ export class WorkCommentService {
 
     const entity = WorkCommentMapper.toEntity(dto, userId);
 
-    return this.workCommentRepository.create(entity);
+    const comment = await this.workCommentRepository.create(entity);
+
+    this.eventEmitter.emit(
+      'work-comment.created',
+      new CommentCreatedEvent(
+        comment.id,
+        dto.workItemId,
+        userId,
+        comment.content,
+      ),
+    );
+
+    return comment;
   }
 
   /**
@@ -60,11 +80,26 @@ export class WorkCommentService {
       throw new ForbiddenException('You cannot edit this comment');
     }
 
+    const oldContent = comment.content;
+
     WorkCommentMapper.updateEntity(comment, dto.content);
 
-    return this.workCommentRepository.update(id, {
+    const updated = await this.workCommentRepository.update(id, {
       content: comment.content,
     });
+
+    this.eventEmitter.emit(
+      'work-comment.updated',
+      new CommentUpdatedEvent(
+        comment.id,
+        comment.workItemId,
+        userId,
+        oldContent,
+        comment.content,
+      ),
+    );
+
+    return updated;
   }
 
   /**
@@ -83,6 +118,19 @@ export class WorkCommentService {
 
     await this.workCommentRepository.softDeleteComment(id);
 
+    this.eventEmitter.emit(
+      'work-comment.deleted',
+
+      new CommentDeletedEvent(
+        comment.id,
+
+        comment.workItemId,
+
+        userId,
+
+        comment.content,
+      ),
+    );
     return {
       success: true,
     };

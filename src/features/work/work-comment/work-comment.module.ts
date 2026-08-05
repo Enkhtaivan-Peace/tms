@@ -13,20 +13,29 @@ import { WorkCommentQueryRepository } from './repositories/work-comment-query.re
 
 import { WorkItemModule } from '../work-item/work-item.module';
 import { WorkCommentController } from './controller/work-comment.controller';
+import { WorkActivityModule } from '../work-activity/work-activity.module';
+import { CommentCreatedListener } from './listeners/comment-created.listener';
+import { CommentUpdatedListener } from './listeners/comment-updated.listener';
+import { CommentDeletedListener } from './listeners/comment-deleted.listener';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkCommentEntity]), WorkItemModule],
+  imports: [
+    TypeOrmModule.forFeature([WorkCommentEntity]),
+    WorkItemModule,
+    WorkActivityModule,
+  ],
 
   controllers: [WorkCommentController],
 
   providers: [
     WorkCommentService,
-
     WorkCommentQueryService,
-
     WorkCommentRepository,
-
     WorkCommentQueryRepository,
+    WorkCommentService,
+    CommentCreatedListener,
+    CommentUpdatedListener,
+    CommentDeletedListener,
   ],
 
   exports: [WorkCommentService, WorkCommentQueryService],

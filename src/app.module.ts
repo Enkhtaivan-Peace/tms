@@ -12,6 +12,7 @@ import { TeamModule } from './features/org/team/team.module';
 import { WorkModule } from './features/work/work.module';
 import { SequenceModule } from './common/sequence/sequence.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { NotificationModule } from './features/notification/notification.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     SequenceModule,
     IamModule,
+    NotificationModule,
     DepartmentModule,
     TeamModule,
     WorkModule,

@@ -14,6 +14,7 @@ import { UserStatus } from 'src/common/helpers/enums/user-status.enum';
 import { UserRole } from './user-role.entity';
 import { UserSession } from './user-session.entity';
 import { WorkCommentEntity } from 'src/features/work/work-comment/entities/work-comment.entity';
+import { NotificationEntity } from 'src/features/notification/entity/notification.entity';
 
 @Entity('iam_users')
 export class User extends BaseEntity {
@@ -97,4 +98,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => WorkCommentEntity, (comment) => comment.author)
   comments!: WorkCommentEntity[];
+
+  @OneToMany(() => NotificationEntity, (notification) => notification.recipient)
+  notifications!: NotificationEntity[];
 }
