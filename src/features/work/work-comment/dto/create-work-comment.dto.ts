@@ -1,14 +1,24 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateWorkCommentDto {
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   workItemId!: number;
 
   @IsOptional()
-  @IsNumber()
-  parentId?: number;
+  @IsInt()
+  @Min(1)
+  parentCommentId?: number;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(5000)
   content!: string;
 }

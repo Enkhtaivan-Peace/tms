@@ -1,37 +1,87 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
-  Req,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
+
 import { WorkCommentService } from '../services/work-comment.service';
+import { WorkCommentQueryService } from '../services/work-comment-query.service';
+
 import { CreateWorkCommentDto } from '../dto/create-work-comment.dto';
+import { UpdateWorkCommentDto } from '../dto/update-work-comment.dto';
+import { WorkCommentFilterDto } from '../dto/work-comment-filter.dto';
+
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('work-comments')
 export class WorkCommentController {
-  constructor(private readonly service: WorkCommentService) {}
+  constructor(
+    private readonly workCommentService: WorkCommentService,
 
+    private readonly workCommentQueryService: WorkCommentQueryService,
+  ) {}
+
+  /**
+   * Create comment
+   */
   @Post()
-  create(@Body() dto: CreateWorkCommentDto, @Req() req: any) {
-    return this.service.create(dto, req.user.id);
+  async create(@Body() dto: CreateWorkCommentDto, @CurrentUser() user) {
+    return this.workCommentService.create(dto, user.id);
   }
 
-  @Get('/work-item/:id')
-  findByWorkItem(@Param('id') id: number) {
-    return this.service.findByWorkItem(Number(id));
-  }
-
+  /**
+   * Update comment
+   */
   @Patch(':id')
-  update(@Param('id') id: number, @Body() body: any, @Req() req: any) {
-    return this.service.update(Number(id), body.content, req.user.id);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+
+    @Body() dto: UpdateWorkCommentDto,
+
+    @CurrentUser() user,
+  ) {
+    return this.workCommentService.update(id, dto, user.id);
   }
 
+  /**
+   * Delete comment
+   */
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.service.remove(Number(id));
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+
+    @CurrentUser() user,
+  ) {
+    return this.workCommentService.remove(id, user.id);
+  }
+
+  /**
+   * Get comment
+   */
+  @Get(':id')
+  async findById(@Param('id', ParseIntPipe) id: number) {
+    return this.workCommentService.findById(id);
+  }
+
+  /**
+   * Get comment thread
+   */
+  @Get(':id/thread')
+  async thread(@Param('id', ParseIntPipe) id: number) {
+    return this.workCommentService.getThread(id);
+  }
+
+  /**
+   * List comments by WorkItem
+   */
+  @Get()
+  async findAll(@Query() filter: WorkCommentFilterDto) {
+    return this.workCommentQueryService.findAll(filter);
   }
 }

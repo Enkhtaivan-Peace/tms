@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 import { BaseEntity } from 'src/common/base/base.entity';
 
@@ -7,6 +7,7 @@ import { WorkTypeEntity } from '../../work-type/entities/work-type.entity';
 import { WorkCategoryEntity } from '../../work-category/entities/work-category.entity';
 
 import { WorkStatusEntity } from '../../work-status/entities/work-status.entity';
+import { WorkTemplateStatusEntity } from '../../work-template-status/entities/work-template-status.entity';
 
 @Entity({
   name: 'work_templates',
@@ -61,6 +62,9 @@ export class WorkTemplateEntity extends BaseEntity {
     name: 'work_category_id',
   })
   workCategory?: WorkCategoryEntity;
+
+  @OneToMany(() => WorkTemplateStatusEntity, (status) => status.workTemplate)
+  statuses!: WorkTemplateStatusEntity[];
 
   /**
    * Sequence key

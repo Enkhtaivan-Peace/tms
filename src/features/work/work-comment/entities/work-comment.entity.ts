@@ -1,40 +1,33 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  UpdateDateColumn,
+} from 'typeorm';
+
+import { BaseEntity } from 'src/common/base/base.entity';
 
 import { WorkItemEntity } from '../../work-item/entities/work-item.entity';
-import { BaseEntity } from 'src/common/base/base.entity';
+import { User } from 'src/features/iam/entities/user.entity';
 
 @Entity('work_comments')
 export class WorkCommentEntity extends BaseEntity {
-  @ManyToOne(() => WorkItemEntity, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({
-    name: 'work_item_id',
-  })
-  workItem!: WorkItemEntity;
-
-  @Column({
-    name: 'work_item_id',
-  })
+  @Column({ name: 'work_item_id', type: 'bigint' })
   workItemId!: number;
 
-  @ManyToOne(() => WorkCommentEntity, (comment) => comment.replies, {
-    nullable: true,
-  })
-  @JoinColumn({
-    name: 'parent_id',
-  })
-  parent?: WorkCommentEntity;
-
   @Column({
-    name: 'parent_id',
+    name: 'parent_comment_id',
+    type: 'bigint',
     nullable: true,
   })
-  parentId?: number;
+  parentCommentId?: number;
 
-  @OneToMany(() => WorkCommentEntity, (comment) => comment.parent)
-  replies!: WorkCommentEntity[];
+  @Column({ name: 'author_id', type: 'bigint' })
+  authorId!: number;
 
   @Column({
     type: 'text',
@@ -42,25 +35,56 @@ export class WorkCommentEntity extends BaseEntity {
   content!: string;
 
   @Column({
-    name: 'created_by',
-  })
-  createdBy!: number;
-
-  @Column({
-    name: 'updated_by',
-    nullable: true,
-  })
-  updatedBy?: number;
-
-  @Column({
     name: 'is_edited',
+    type: 'boolean',
     default: false,
   })
   isEdited!: boolean;
 
-  @Column({
+  @ManyToOne(() => WorkItemEntity, (workItem) => workItem.comments, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'work_item_id',
+  })
+  workItem!: WorkItemEntity;
+
+  @ManyToOne(() => User, {
+    eager: true,
+  })
+  @JoinColumn({
+    name: 'author_id',
+  })
+  author!: User;
+
+  @ManyToOne(() => WorkCommentEntity, (comment) => comment.replies, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({
+    name: 'parent_comment_id',
+  })
+  parent?: WorkCommentEntity;
+
+  @OneToMany(() => WorkCommentEntity, (comment) => comment.parent)
+  replies!: WorkCommentEntity[];
+
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp',
+  })
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp',
+  })
+  updatedAt!: Date;
+
+  @DeleteDateColumn({
     name: 'deleted_at',
+    type: 'timestamp',
     nullable: true,
   })
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }

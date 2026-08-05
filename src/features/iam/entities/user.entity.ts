@@ -13,6 +13,7 @@ import { BaseEntity } from '../../../common/base/base.entity';
 import { UserStatus } from 'src/common/helpers/enums/user-status.enum';
 import { UserRole } from './user-role.entity';
 import { UserSession } from './user-session.entity';
+import { WorkCommentEntity } from 'src/features/work/work-comment/entities/work-comment.entity';
 
 @Entity('iam_users')
 export class User extends BaseEntity {
@@ -93,4 +94,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserSession, (session) => session.user)
   sessions!: UserSession[];
+
+  @OneToMany(() => WorkCommentEntity, (comment) => comment.author)
+  comments!: WorkCommentEntity[];
 }

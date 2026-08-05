@@ -7,6 +7,7 @@ import { WorkTemplateEntity } from '../../work-template/entities/work-template.e
 import { WorkStatusEntity } from '../../work-status/entities/work-status.entity';
 import { WorkItemAssignmentEntity } from '../../work-item-assignment/entities/work-item-assignment.entity';
 import { WorkActivityEntity } from '../../work-activity/entities/work-activity.entity';
+import { WorkCommentEntity } from '../../work-comment/entities/work-comment.entity';
 
 @Entity({
   name: 'work_items',
@@ -146,6 +147,9 @@ export class WorkItemEntity extends BaseEntity {
 
   @OneToMany(() => WorkActivityEntity, (activity) => activity.workItem)
   activities!: WorkActivityEntity[];
+
+  @OneToMany(() => WorkCommentEntity, (comment) => comment.author)
+  comments!: WorkCommentEntity[];
   /**
    * Completed timestamp
    */
