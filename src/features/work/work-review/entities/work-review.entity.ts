@@ -13,6 +13,7 @@ import {
 import { WorkReviewStatus } from '../enums/work-review-status.enum';
 import { WorkItemEntity } from '../../work-item/entities/work-item.entity';
 import { WorkReviewStep } from './work-review-step.entity';
+import { WorkReviewDecision } from './work-review-decision.entity';
 
 @Entity('work_reviews')
 export class WorkReview {
@@ -62,6 +63,9 @@ export class WorkReview {
 
   @OneToMany(() => WorkReviewStep, (step) => step.review)
   steps!: WorkReviewStep[];
+
+  @OneToMany(() => WorkReviewDecision, (decision) => decision.review)
+  decisions!: WorkReviewDecision[];
 
   @CreateDateColumn({
     name: 'created_at',

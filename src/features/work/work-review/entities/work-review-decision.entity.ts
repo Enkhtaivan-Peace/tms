@@ -10,6 +10,7 @@ import {
 import { WorkReviewStep } from './work-review-step.entity';
 
 import { ReviewDecision } from '../enums/review-decision.enum';
+import { WorkReview } from './work-review.entity';
 
 @Entity('work_review_decisions')
 export class WorkReviewDecision {
@@ -26,6 +27,15 @@ export class WorkReviewDecision {
     name: 'review_step_id',
   })
   reviewStep!: WorkReviewStep;
+
+  @ManyToOne(() => WorkReview, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'work_item_id',
+  })
+  review?: WorkReview;
 
   @Column({
     type: 'enum',

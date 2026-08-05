@@ -12,6 +12,7 @@ import { NotificationModule } from './notification/notification.module';
 import { WorkItemAssignmentHistoryModule } from './work-item-assignment-history/work-item-assignment-history.module';
 import { WorkReviewModule } from './work-review/work-review.module';
 import { WorkCommentModule } from './work-comment/work-comment.module';
+import { WorkTimelineModule } from './work-timeline/work-timeline.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { WorkCommentModule } from './work-comment/work-comment.module';
     WorkItemAssignmentHistoryModule,
     WorkReviewModule,
     WorkCommentModule,
+    WorkTimelineModule,
   ],
 })
 export class WorkModule {}

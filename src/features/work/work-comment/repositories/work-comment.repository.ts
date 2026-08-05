@@ -43,6 +43,21 @@ export class WorkCommentRepository extends BaseRepository<WorkCommentEntity> {
     });
   }
 
+  async findByWorkItem(workItemId: number): Promise<WorkCommentEntity[]> {
+    return this.repository.find({
+      where: {
+        workItemId,
+        deletedAt: IsNull(),
+      },
+      relations: {
+        author: true,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+  }
+
   async softDeleteComment(id: number): Promise<void> {
     await this.repository.softDelete(id);
   }

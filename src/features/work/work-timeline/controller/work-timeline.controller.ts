@@ -1,15 +1,36 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { TimelineService } from '../services/timeline.service';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { WorkTimelineQueryService } from '../services/work-timeline-query.service';
+import { WorkTimelineFilterDto } from '../dto/work-timeline-filter.dto';
 
 @Controller('work-items')
 export class WorkTimelineController {
-  constructor(private readonly service: TimelineService) {}
+  constructor(
+    private readonly workTimelineQueryService: WorkTimelineQueryService,
+  ) {}
 
+  /**
+   * Get work item timeline
+   *
+   * GET /work-items/:id/timeline
+   *
+   * Query:
+   * ?page=1
+   * ?limit=20
+   * ?eventType=COMMENT_CREATED
+   * ?fromDate=2026-08-01
+   * ?toDate=2026-08-05
+   */
   @Get(':id/timeline')
-  async timeline(
+  async findTimeline(
     @Param('id', ParseIntPipe)
-    id: number,
+    workItemId: number,
+
+    @Query()
+    filter: WorkTimelineFilterDto,
   ) {
-    return this.service.findByWorkItem(id);
+    return this.workTimelineQueryService.findAll({
+      ...filter,
+      workItemId,
+    });
   }
 }

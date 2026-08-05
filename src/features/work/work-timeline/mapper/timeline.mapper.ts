@@ -1,83 +1,46 @@
-import { TimelineItemDto } from '../dto/timeline-item.dto';
-import { TimelineType } from '../enums/timeline-type.enum';
+// src/features/work/work-timeline/mapper/timeline.mapper.ts
 
-import { WorkActivityEntity } from '../../work-activity/entities/work-activity.entity';
-import { WorkItemAssignmentHistoryEntity } from '../../work-item-assignment-history/entities/work-item-assignment-history.entity';
-import { WorkReviewDecision } from '../../work-review/entities/work-review-decision.entity';
-import { AssignmentHistoryAction } from '../../work-item-assignment-history/enum/work-item-assignment-action.enum';
+import { TimelineEventType } from '../dto/timeline-event-type.enum';
+import { WorkTimelineResponseDto } from '../dto/work-timeline-response.dto';
 
 export class TimelineMapper {
-  private static resolveAssignmentTitle(
-    action: AssignmentHistoryAction,
-  ): string {
-    switch (action) {
-      case AssignmentHistoryAction.ASSIGNED:
-        return 'Work item assigned';
-
-      case AssignmentHistoryAction.REASSIGNED:
-        return 'Work item reassigned';
-
-      case AssignmentHistoryAction.ROLE_CHANGED:
-        return 'Assignment role changed';
-
-      case AssignmentHistoryAction.REMOVED:
-        return 'Assignment removed';
-
-      default:
-        return 'Assignment changed';
-    }
-  }
-  /**
-   * WorkActivity -> Timeline
-   */
-  static fromActivity(activity: WorkActivityEntity): TimelineItemDto {
+  static activity(activity: any): WorkTimelineResponseDto {
     return {
-      type: this.resolveActivityType(activity.action),
+      id: activity.id,
 
-      title: this.resolveActivityTitle(activity.action),
+      type: TimelineEventType.STATUS_CHANGED,
 
-      actorId: activity.actorId,
+      title: activity.activityType,
 
-      metadata: {
-        action: activity.action,
+      description: activity.description,
 
-        oldValue: activity.oldValue,
+      actor: activity.actor
+        ? {
+            id: activity.actor.id,
+            name: activity.actor.name,
+          }
+        : undefined,
 
-        newValue: activity.newValue,
-      },
+      metadata: activity.metadata,
 
       createdAt: activity.createdAt,
     };
   }
 
-  /**
-   * Assignment History -> Timeline
-   */
-  static fromAssignment(
-    history: WorkItemAssignmentHistoryEntity,
-  ): TimelineItemDto {
+  static assignment(history: any): WorkTimelineResponseDto {
     return {
-      type: TimelineType.ASSIGNED,
+      id: history.id,
 
-      title: this.resolveAssignmentTitle(history.action),
+      type: TimelineEventType.ASSIGNED,
 
-      actorId: history.changedBy,
+      title: 'Work assignment changed',
+
+      description: `${history.previousUserId ?? '-'} → ${history.newUserId ?? '-'}`,
 
       metadata: {
-        assignmentId: history.assignmentId,
-
-        action: history.action,
-
-        oldRole: history.oldRole,
-
-        newRole: history.newRole,
-
-        oldUserId: history.oldUserId,
-
+        previousUserId: history.previousUserId,
         newUserId: history.newUserId,
-
-        oldTeamId: history.oldTeamId,
-
+        previousTeamId: history.previousTeamId,
         newTeamId: history.newTeamId,
       },
 
@@ -85,77 +48,116 @@ export class TimelineMapper {
     };
   }
 
-  /**
-   * Review Decision -> Timeline
-   */
-  static fromDecision(decision: WorkReviewDecision): TimelineItemDto {
-    return {
-      type: this.resolveDecisionType(decision.decision),
+  static review(review: any): WorkTimelineResponseDto[] {
+    const events: WorkTimelineResponseDto[] = [];
 
-      title: this.resolveDecisionTitle(decision.decision),
+    /**
+     * Review started
+     */
+    events.push({
+      id: review.id,
 
-      actorId: decision.decidedBy,
+      type: TimelineEventType.REVIEW_STARTED,
+
+      title: 'Review started',
+
+      description: `Review status: ${review.status}`,
 
       metadata: {
-        reviewStepId: decision.reviewStep.id,
-        comment: decision.comment,
-        decision: decision.decision,
+        reviewId: review.id,
+        status: review.status,
       },
 
-      createdAt: decision.createdAt,
+      createdAt: review.createdAt,
+    });
+
+    /**
+     * Review steps
+     */
+    for (const step of review.steps ?? []) {
+      events.push({
+        id: step.id,
+
+        type: TimelineEventType.REVIEW_STEP_CHANGED,
+
+        title: `Review step: ${step.role}`,
+
+        description: step.status,
+
+        metadata: {
+          reviewId: review.id,
+
+          stepId: step.id,
+
+          reviewerId: step.reviewerId,
+        },
+
+        createdAt: step.createdAt,
+      });
+    }
+
+    /**
+     * Review decisions
+     */
+    for (const decision of review.decisions ?? []) {
+      let type = TimelineEventType.REVIEW_STEP_CHANGED;
+
+      if (decision.decision === 'APPROVED') {
+        type = TimelineEventType.REVIEW_APPROVED;
+      }
+
+      if (decision.decision === 'REJECTED') {
+        type = TimelineEventType.REVIEW_REJECTED;
+      }
+
+      events.push({
+        id: decision.id,
+
+        type,
+
+        title: `Review ${decision.decision}`,
+
+        description: decision.comment,
+
+        metadata: {
+          reviewId: review.id,
+
+          stepId: decision.stepId,
+
+          decision: decision.decision,
+        },
+
+        createdAt: decision.createdAt,
+      });
+    }
+
+    return events;
+  }
+
+  static comment(comment: any): WorkTimelineResponseDto {
+    return {
+      id: comment.id,
+
+      type: TimelineEventType.COMMENT_CREATED,
+
+      title: `${comment.author?.name ?? 'User'} commented`,
+
+      description: comment.content,
+
+      actor: comment.author
+        ? {
+            id: comment.author.id,
+            name: comment.author.name,
+          }
+        : undefined,
+
+      metadata: {
+        commentId: comment.id,
+
+        parentCommentId: comment.parentCommentId,
+      },
+
+      createdAt: comment.createdAt,
     };
-  }
-
-  private static resolveActivityType(action: string): TimelineType {
-    switch (action) {
-      case 'STATUS_CHANGED':
-        return TimelineType.STATUS_CHANGED;
-
-      default:
-        return TimelineType.CREATED;
-    }
-  }
-
-  private static resolveActivityTitle(action: string): string {
-    switch (action) {
-      case 'STATUS_CHANGED':
-        return 'Work status changed';
-
-      case 'CREATED':
-        return 'Work item created';
-
-      default:
-        return action;
-    }
-  }
-
-  private static resolveDecisionType(decision: string): TimelineType {
-    switch (decision) {
-      case 'APPROVE':
-        return TimelineType.REVIEW_APPROVED;
-
-      case 'REJECT':
-      case 'REQUEST_CHANGES':
-        return TimelineType.REVIEW_REJECTED;
-
-      default:
-        return TimelineType.REVIEW_APPROVED;
-    }
-  }
-
-  private static resolveDecisionTitle(decision: string): string {
-    switch (decision) {
-      case 'APPROVE':
-        return 'Review approved';
-
-      case 'REJECT':
-        return 'Review rejected';
-
-      case 'REQUEST_CHANGES':
-        return 'Changes requested';
-
-      default:
-        return 'Review decision';
-    }
   }
 }

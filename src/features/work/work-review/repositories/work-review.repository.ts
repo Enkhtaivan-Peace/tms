@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { WorkReview } from '../entities/work-review.entity';
 import { BaseRepository } from 'src/common/base/base.repository';
@@ -20,10 +20,11 @@ export class WorkReviewRepository extends BaseRepository<WorkReview> {
         workItem: {
           id: workItemId,
         },
+        deletedAt: IsNull(),
       },
-
       relations: {
         steps: true,
+        decisions: true,
       },
     });
   }
