@@ -1,8 +1,8 @@
-export class WorkItemAssignmentRemovedEvent {
+export class CommentDeletedNotificationEvent {
   constructor(
-    public readonly assignmentId: number,
-
     public readonly workItemId: number,
+
+    public readonly commentId: number,
 
     public readonly actorId: number,
   ) {}

@@ -38,6 +38,6 @@ import { ReviewPermissionService } from './services/review-permission.service';
     ReviewPermissionService,
   ],
 
-  exports: [ReviewEngineService],
+  exports: [WorkReviewRepository, WorkReviewService, ReviewEngineService],
 })
 export class WorkReviewModule {}

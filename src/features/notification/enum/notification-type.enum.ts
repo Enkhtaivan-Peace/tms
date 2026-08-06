@@ -1,14 +1,9 @@
 export enum NotificationType {
   WORK_CREATED = 'WORK_CREATED',
 
-  /**
-   * Ажил ажилтанд оноогдсон
-   *
-   * Example:
-   * Manager -> John
-   */
   WORK_ASSIGNED = 'WORK_ASSIGNED',
-
+  WORK_ASSIGNMENT_ROLE_CHANGED = 'WORK_ASSIGNMENT_ROLE_CHANGED',
+  WORK_ASSIGNMENT_REMOVED = 'WORK_ASSIGNMENT_REMOVED',
   /**
    * Ажлын assignment өөрчлөгдсөн
    *
@@ -70,7 +65,7 @@ export enum NotificationType {
    *
    * @john
    */
-  COMMENT_MENTION = 'COMMENT_MENTION',
+  COMMENT_MENTIONED = 'COMMENT_MENTIONED',
 
   /**
    * Comment update болсон
@@ -81,6 +76,8 @@ export enum NotificationType {
    * Comment delete болсон
    */
   COMMENT_DELETED = 'COMMENT_DELETED',
+
+  COMMENT_REPLIED = 'COMMENT_REPLIED',
 
   /**
    * ==========================================

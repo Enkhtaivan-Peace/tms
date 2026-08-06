@@ -26,6 +26,10 @@ import { WorkTimelineQueryService } from './services/work-timeline-query.service
     WorkTimelineQueryService,
   ],
 
-  exports: [WorkActivityService, WorkTimelineQueryService],
+  exports: [
+    WorkActivityService,
+    WorkTimelineQueryService,
+    WorkActivityRepository,
+  ],
 })
 export class WorkActivityModule {}

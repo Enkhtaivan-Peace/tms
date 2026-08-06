@@ -28,6 +28,22 @@ export class WorkItemAssignmentRepository extends BaseRepository<WorkItemAssignm
     });
   }
 
+  async findOwnerByWorkItem(
+    workItemId: number,
+  ): Promise<WorkItemAssignmentEntity | null> {
+    return this.findOne(
+      {
+        workItemId,
+        role: AssignmentRole.OWNER,
+        deletedAt: IsNull(),
+      },
+      {
+        user: true,
+        team: true,
+      },
+    );
+  }
+
   async existsOwner(workItemId: number) {
     return this.exists({
       workItemId,
@@ -35,6 +51,23 @@ export class WorkItemAssignmentRepository extends BaseRepository<WorkItemAssignm
       role: AssignmentRole.OWNER,
 
       deletedAt: IsNull(),
+    });
+  }
+
+  async findByRole(
+    workItemId: number,
+    role: AssignmentRole,
+  ): Promise<WorkItemAssignmentEntity[]> {
+    return this.findAll({
+      where: {
+        workItemId,
+        role,
+        deletedAt: IsNull(),
+      },
+      relations: {
+        user: true,
+        team: true,
+      },
     });
   }
 }

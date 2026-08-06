@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { CommentDeletedEvent } from '../events/comment-deleted.event';
+import { CommentDeletedActivityEvent } from '../events/comment-deleted-activity.event';
 
 import { WorkActivityService } from '../../work-activity/services/work-activity.service';
 
@@ -15,7 +15,7 @@ export class CommentDeletedListener {
   constructor(private readonly workActivityService: WorkActivityService) {}
 
   @OnEvent('work-comment.deleted')
-  async handle(event: CommentDeletedEvent) {
+  async handle(event: CommentDeletedActivityEvent) {
     this.logger.log(`Comment deleted: ${event.commentId}`);
 
     await this.workActivityService.create({

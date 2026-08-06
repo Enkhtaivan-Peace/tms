@@ -31,6 +31,6 @@ import { WorkStatusModule } from '../work-status/work-status.module';
 
   controllers: [WorkItemController],
   providers: [WorkItemService, WorkItemRepository, WorkItemQueryRepository],
-  exports: [WorkItemService],
+  exports: [WorkItemService, WorkItemRepository],
 })
 export class WorkItemModule {}

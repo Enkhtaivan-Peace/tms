@@ -14,11 +14,14 @@ import { WorkCommentMapper } from '../mapper/work-comment.mapper';
 import { WorkItemRepository } from '../../work-item/repositories/work-item.repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { CommentCreatedEvent } from '../events/comment-created.event';
+import { CommentCreatedActivityEvent } from '../events/comment-created-activity.event';
 
-import { CommentUpdatedEvent } from '../events/comment-updated.event';
+import { CommentUpdatedActivityEvent } from '../events/comment-updated-activity.event';
 
-import { CommentDeletedEvent } from '../events/comment-deleted.event';
+import { CommentDeletedActivityEvent } from '../events/comment-deleted-activity.event';
+import { WorkCommentCreatedNotificationEvent } from 'src/features/notification/events/comment/comment-created-notification.event';
+import { WorkCommentUpdatedNotificationEvent } from 'src/features/notification/events/comment/comment-updated-notification.event';
+import { NotificationEventType } from 'src/features/notification/enum/notification-event-type.enum';
 
 @Injectable()
 export class WorkCommentService {
@@ -55,11 +58,21 @@ export class WorkCommentService {
 
     this.eventEmitter.emit(
       'work-comment.created',
-      new CommentCreatedEvent(
+      new CommentCreatedActivityEvent(
         comment.id,
         dto.workItemId,
         userId,
         comment.content,
+      ),
+    );
+
+    this.eventEmitter.emit(
+      NotificationEventType.COMMENT_CREATED,
+      new WorkCommentCreatedNotificationEvent(
+        comment.workItemId,
+        comment.id,
+        comment.authorId,
+        userId,
       ),
     );
 
@@ -90,12 +103,22 @@ export class WorkCommentService {
 
     this.eventEmitter.emit(
       'work-comment.updated',
-      new CommentUpdatedEvent(
+      new CommentUpdatedActivityEvent(
         comment.id,
         comment.workItemId,
         userId,
         oldContent,
         comment.content,
+      ),
+    );
+
+    this.eventEmitter.emit(
+      'work-comment-created-notification',
+      new WorkCommentUpdatedNotificationEvent(
+        comment.workItemId,
+        comment.id,
+        comment.authorId,
+        userId,
       ),
     );
 
@@ -121,7 +144,7 @@ export class WorkCommentService {
     this.eventEmitter.emit(
       'work-comment.deleted',
 
-      new CommentDeletedEvent(
+      new CommentDeletedActivityEvent(
         comment.id,
 
         comment.workItemId,

@@ -1,6 +1,6 @@
 // events/comment-updated.event.ts
 
-export class CommentUpdatedEvent {
+export class CommentUpdatedActivityEvent {
   constructor(
     public readonly commentId: number,
 

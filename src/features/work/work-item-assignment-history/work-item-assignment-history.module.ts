@@ -14,6 +14,9 @@ import { WorkItemAssignmentHistoryController } from './controller/work-item-assi
     WorkItemAssignmentHistoryService,
   ],
   controllers: [WorkItemAssignmentHistoryController],
-  exports: [WorkItemAssignmentHistoryService],
+  exports: [
+    WorkItemAssignmentHistoryService,
+    WorkItemAssignmentHistoryRepository,
+  ],
 })
 export class WorkItemAssignmentHistoryModule {}

@@ -16,11 +16,12 @@ import { WorkItemAssignmentEntity } from '../entities/work-item-assignment.entit
 import { IsNull } from 'typeorm';
 import { AssignmentRole } from '../enum/work-item-assignment.enum';
 import { WorkItemAssignmentHistoryService } from '../../work-item-assignment-history/services/work-item-assignment-history.service';
-import { WorkItemAssignmentCreatedEvent } from '../../events/work-item-assignment-created.event';
-import { WorkItemAssignmentRoleChangedEvent } from '../../events/work-item-assignment-role-changed.event';
-import { WorkItemAssignmentRemovedEvent } from '../../events/work-item-assignment-removed.event';
+
+import { WorkItemAssignmentRemovedEvent } from '../../../notification/events/assignment/work-item-assignment-removed-notification.event';
 import { WorkActivityService } from '../../work-activity/services/work-activity.service';
 import { WorkActivityAction } from '../../work-activity/enums/work-activity-action.enum';
+import { WorkAssignedNotificationEvent } from 'src/features/notification/events/assignment/work-assigned-notification.event';
+import { WorkItemAssignmentRoleChangedEvent } from 'src/features/notification/events/assignment/work-item-assignment-role-changed-notification.event';
 
 @Injectable()
 export class WorkItemAssignmentService {
@@ -50,6 +51,14 @@ export class WorkItemAssignmentService {
 
         team: true,
       },
+    });
+  }
+
+  async findOwnerByWorkItem(workItemId: number) {
+    return this.repository.findOne({
+      workItemId,
+      role: AssignmentRole.OWNER,
+      deletedAt: IsNull(),
     });
   }
 
@@ -99,8 +108,8 @@ export class WorkItemAssignmentService {
       });
 
       this.eventEmitter.emit(
-        'work-item.assignment.created',
-        new WorkItemAssignmentCreatedEvent(assignment, actorId),
+        'notification.work.assigned',
+        new WorkAssignedNotificationEvent(workItemId, dto.userId!, actorId),
       );
 
       return assignment;
@@ -176,13 +185,17 @@ export class WorkItemAssignmentService {
     });
 
     this.eventEmitter.emit(
-      'work-item.assignment.role.changed',
+      'notification.work.assignment.role.changed',
 
       new WorkItemAssignmentRoleChangedEvent(
-        assignmentId,
         assignment.workItemId,
+
+        assignment.userId!,
+
         oldRole,
+
         dto.role,
+
         actorId,
       ),
     );
@@ -230,13 +243,12 @@ export class WorkItemAssignmentService {
 
     await this.repository.softDelete(assignmentId);
     this.eventEmitter.emit(
-      'work-item.assignment.removed',
+      'notification.work.assignment.removed',
 
       new WorkItemAssignmentRemovedEvent(
-        assignment.id,
-
         assignment.workItemId,
-
+        assignment.userId,
+        assignment.role,
         actorId,
       ),
     );

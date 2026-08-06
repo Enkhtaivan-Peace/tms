@@ -25,6 +25,8 @@ import { WorkItemAssignmentService } from '../../work-item-assignment/services/w
 import { AssignmentRole } from '../../work-item-assignment/enum/work-item-assignment.enum';
 import { WorkItemEntity } from '../entities/work-item.entity';
 import { WorkStatusService } from '../../work-status/services/work-status.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { WorkStatusChangedEvent } from '../../work-status/events/work-status-changed.event';
 
 @Injectable()
 export class WorkItemService {
@@ -37,6 +39,7 @@ export class WorkItemService {
     private readonly transitionService: WorkStatusTransitionService,
     private readonly assignmentService: WorkItemAssignmentService,
     private readonly statusService: WorkStatusService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -158,6 +161,27 @@ export class WorkItemService {
       description: transition.description ?? 'Work item status changed',
     });
     await this.handleSubTaskCompletion(item, statusId, actorId);
+
+    /**
+     * Notification Event
+     */
+    const owner = await this.assignmentService.findOwnerByWorkItem(id);
+
+    if (owner?.userId) {
+      const oldStatus = await this.statusService.findOne(fromStatusId);
+
+      const newStatus = await this.statusService.findOne(statusId);
+
+      this.eventEmitter.emit(
+        'notification.work.status.changed',
+        new WorkStatusChangedEvent(
+          id,
+          owner.userId,
+          oldStatus.code,
+          newStatus.code,
+        ),
+      );
+    }
 
     return this.findOne(id);
   }

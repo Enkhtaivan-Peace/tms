@@ -21,6 +21,6 @@ import { WorkItemAssignmentController } from './controller/work-item-assignment.
 
   controllers: [WorkItemAssignmentController],
 
-  exports: [WorkItemAssignmentService],
+  exports: [WorkItemAssignmentService, WorkItemAssignmentRepository],
 })
 export class WorkItemAssignmentModule {}
